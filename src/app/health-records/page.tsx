@@ -13,6 +13,29 @@ type HealthRecord = {
   dataUrl: string;
 };
 
+type AnalysisResult = {
+  patient?: {
+    name?: string;
+    age?: string;
+    gender?: string;
+  };
+  report?: {
+    name?: string;
+    date?: string;
+  };
+  results?: {
+    parameter: string;
+    value: string;
+    unit: string;
+    referenceRange: string;
+    status: string;
+    explanation: string;
+  }[];
+  summary?: string;
+  doctorReview?: string;
+  rawAnalysis?: string;
+};
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const ALLOWED_TYPES = [
@@ -34,10 +57,13 @@ export default function HealthRecordsPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [analysisFileName, setAnalysisFileName] = useState("");
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  // Load records from database
   const loadRecords = async () => {
     try {
       setLoading(true);
@@ -72,10 +98,11 @@ export default function HealthRecordsPage() {
     loadRecords();
   }, []);
 
-  // File selection
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     setError("");
     setMessage("");
+    setAnalysis(null);
+    setAnalysisFileName("");
 
     const file = event.target.files?.[0];
 
@@ -101,7 +128,6 @@ export default function HealthRecordsPage() {
     setSelectedFile(file);
   };
 
-  // Save record to database
   const saveRecord = async () => {
     setError("");
     setMessage("");
@@ -123,16 +149,6 @@ export default function HealthRecordsPage() {
 
     if (!selectedFile) {
       setError("Please upload a report file.");
-      return;
-    }
-
-    if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-      setError("Only PDF, JPG, PNG and WEBP files are allowed.");
-      return;
-    }
-
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setError("File size must be 5 MB or less.");
       return;
     }
 
@@ -187,7 +203,52 @@ export default function HealthRecordsPage() {
     }
   };
 
-  // Delete record from database
+  const analyzeReport = async () => {
+    setError("");
+    setMessage("");
+    setAnalysis(null);
+
+    if (!selectedFile) {
+      setError("Please select a medical report first.");
+      return;
+    }
+
+    try {
+      setAnalyzing(true);
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await fetch("/api/report-analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.error || "Unable to analyze the medical report."
+        );
+      }
+
+      setAnalysis(data.analysis || null);
+      setAnalysisFileName(selectedFile.name);
+
+      setMessage("Medical report analyzed successfully.");
+    } catch (err) {
+      console.error("REPORT ANALYSIS ERROR:", err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while analyzing the report."
+      );
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const deleteRecord = async (id: string) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this health record?"
@@ -235,7 +296,6 @@ export default function HealthRecordsPage() {
     }
   };
 
-  // View uploaded report
   const viewRecord = (record: HealthRecord) => {
     const newWindow = window.open("", "_blank");
 
@@ -282,6 +342,7 @@ export default function HealthRecordsPage() {
 
         <body>
           <h2>${record.name}</h2>
+
           ${
             record.fileType === "application/pdf"
               ? `<iframe src="${record.dataUrl}"></iframe>`
@@ -304,10 +365,29 @@ export default function HealthRecordsPage() {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
+  const getStatusClass = (status: string) => {
+    const normalized = status.toUpperCase();
+
+    if (normalized === "NORMAL") {
+      return "border-green-400/30 bg-green-400/10 text-green-300";
+    }
+
+    if (normalized === "HIGH") {
+      return "border-red-400/30 bg-red-400/10 text-red-300";
+    }
+
+    if (normalized === "LOW") {
+      return "border-orange-400/30 bg-orange-400/10 text-orange-300";
+    }
+
+    return "border-gray-400/30 bg-gray-400/10 text-gray-300";
+  };
+
   return (
-    <main className="min-h-screen bg-[#05080c] text-white px-4 py-8 md:px-8">
+    <main className="min-h-screen bg-[#05080c] px-4 py-8 text-white md:px-8">
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="mb-8">
           <p className="mb-2 text-sm font-semibold tracking-[0.25em] text-cyan-400">
             HEALTHCARE 360
@@ -318,11 +398,12 @@ export default function HealthRecordsPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm text-gray-400 md:text-base">
-            Securely store and access your medical reports in one place.
+            Securely store, access and understand your medical reports with
+            AI-powered analysis.
           </p>
         </div>
 
-        {/* Messages */}
+        {/* MESSAGES */}
         {error && (
           <div className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {error}
@@ -335,18 +416,21 @@ export default function HealthRecordsPage() {
           </div>
         )}
 
-        {/* Add Record */}
+        {/* UPLOAD SECTION */}
         <section className="mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-2xl md:p-7">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold">Add Health Record</h2>
+            <h2 className="text-xl font-semibold">
+              Add Health Record
+            </h2>
 
             <p className="mt-1 text-sm text-gray-400">
-              Upload your medical report securely.
+              Upload your medical report and optionally analyze it with AI.
             </p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
-            {/* Report Name */}
+
+            {/* REPORT NAME */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-300">
                 Report Name
@@ -357,11 +441,11 @@ export default function HealthRecordsPage() {
                 value={recordName}
                 onChange={(e) => setRecordName(e.target.value)}
                 placeholder="e.g. Complete Blood Count"
-                className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-cyan-400"
+                className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-gray-600 focus:border-cyan-400"
               />
             </div>
 
-            {/* Record Type */}
+            {/* TYPE */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-300">
                 Record Type
@@ -383,7 +467,7 @@ export default function HealthRecordsPage() {
               </select>
             </div>
 
-            {/* Date */}
+            {/* DATE */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-300">
                 Report Date
@@ -397,7 +481,7 @@ export default function HealthRecordsPage() {
               />
             </div>
 
-            {/* File */}
+            {/* FILE */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-300">
                 Upload Report
@@ -424,24 +508,249 @@ export default function HealthRecordsPage() {
             </div>
           </div>
 
-          {/* Save Button */}
-          <button
-            onClick={saveRecord}
-            disabled={saving}
-            className="mt-6 rounded-xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Health Record"}
-          </button>
+          {/* BUTTONS */}
+          <div className="mt-6 flex flex-wrap gap-3">
+
+            <button
+              onClick={saveRecord}
+              disabled={saving || analyzing}
+              className="rounded-xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Health Record"}
+            </button>
+
+            <button
+              onClick={analyzeReport}
+              disabled={analyzing || saving || !selectedFile}
+              className="rounded-xl border border-purple-400/40 bg-purple-500/10 px-6 py-3 text-sm font-semibold text-purple-300 transition hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {analyzing
+                ? "🤖 Analyzing Report..."
+                : "🤖 Analyze with AI"}
+            </button>
+          </div>
+
+          <div className="mt-4 rounded-xl border border-purple-400/10 bg-purple-400/[0.04] p-4">
+            <p className="text-xs leading-5 text-gray-400">
+              <span className="font-semibold text-purple-300">
+                AI Medical Report Analyzer:
+              </span>{" "}
+              The AI extracts information visible in the uploaded report,
+              compares values with the report&apos;s reference ranges when
+              available, and explains the findings in simple language. It does
+              not replace a qualified doctor.
+            </p>
+          </div>
         </section>
 
-        {/* Records */}
+        {/* AI ANALYSIS */}
+        {analysis && (
+          <section className="mb-8 rounded-2xl border border-purple-400/20 bg-purple-400/[0.03] p-5 shadow-2xl md:p-7">
+
+            <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold tracking-[0.2em] text-purple-300">
+                  AI MEDICAL REPORT ANALYZER
+                </p>
+
+                <h2 className="mt-1 text-2xl font-bold">
+                  Analysis Result
+                </h2>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Analyzed file: {analysisFileName}
+                </p>
+              </div>
+
+              <div className="rounded-full border border-purple-400/20 bg-purple-400/10 px-4 py-2 text-xs text-purple-300">
+                AI Analysis
+              </div>
+            </div>
+
+            {/* PATIENT */}
+            {analysis.patient && (
+              <div className="mb-5 rounded-xl border border-white/10 bg-black/20 p-5">
+                <h3 className="mb-4 font-semibold text-white">
+                  Patient Information
+                </h3>
+
+                <div className="grid gap-4 text-sm md:grid-cols-3">
+                  <div>
+                    <p className="text-gray-500">Name</p>
+                    <p className="mt-1 text-gray-200">
+                      {analysis.patient.name || "Not provided"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Age</p>
+                    <p className="mt-1 text-gray-200">
+                      {analysis.patient.age || "Not provided"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Gender</p>
+                    <p className="mt-1 text-gray-200">
+                      {analysis.patient.gender || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* REPORT */}
+            {analysis.report && (
+              <div className="mb-5 rounded-xl border border-white/10 bg-black/20 p-5">
+                <h3 className="mb-4 font-semibold text-white">
+                  Report Information
+                </h3>
+
+                <div className="grid gap-4 text-sm md:grid-cols-2">
+                  <div>
+                    <p className="text-gray-500">Report Name</p>
+                    <p className="mt-1 text-gray-200">
+                      {analysis.report.name || "Not provided"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Report Date</p>
+                    <p className="mt-1 text-gray-200">
+                      {analysis.report.date || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* RESULTS */}
+            {analysis.results && analysis.results.length > 0 && (
+              <div className="mb-5">
+                <h3 className="mb-4 font-semibold text-white">
+                  Medical Parameters
+                </h3>
+
+                <div className="overflow-x-auto rounded-xl border border-white/10">
+                  <table className="w-full min-w-[800px] text-left text-sm">
+                    <thead className="border-b border-white/10 bg-white/[0.04]">
+                      <tr>
+                        <th className="px-4 py-4">Parameter</th>
+                        <th className="px-4 py-4">Value</th>
+                        <th className="px-4 py-4">Unit</th>
+                        <th className="px-4 py-4">Reference Range</th>
+                        <th className="px-4 py-4">Status</th>
+                        <th className="px-4 py-4">Explanation</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {analysis.results.map((item, index) => (
+                        <tr
+                          key={`${item.parameter}-${index}`}
+                          className="border-b border-white/5 last:border-0"
+                        >
+                          <td className="px-4 py-4 font-medium text-white">
+                            {item.parameter}
+                          </td>
+
+                          <td className="px-4 py-4 text-gray-200">
+                            {item.value}
+                          </td>
+
+                          <td className="px-4 py-4 text-gray-400">
+                            {item.unit}
+                          </td>
+
+                          <td className="px-4 py-4 text-gray-400">
+                            {item.referenceRange}
+                          </td>
+
+                          <td className="px-4 py-4">
+                            <span
+                              className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClass(
+                                item.status
+                              )}`}
+                            >
+                              {item.status}
+                            </span>
+                          </td>
+
+                          <td className="max-w-xs px-4 py-4 text-gray-400">
+                            {item.explanation}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* SUMMARY */}
+            {analysis.summary && (
+              <div className="mb-5 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-5">
+                <h3 className="mb-3 font-semibold text-cyan-300">
+                  🧠 Simple Explanation
+                </h3>
+
+                <p className="text-sm leading-7 text-gray-300">
+                  {analysis.summary}
+                </p>
+              </div>
+            )}
+
+            {/* DOCTOR REVIEW */}
+            {analysis.doctorReview && (
+              <div className="rounded-xl border border-orange-400/20 bg-orange-400/[0.04] p-5">
+                <h3 className="mb-3 font-semibold text-orange-300">
+                  👨‍⚕️ Doctor Review
+                </h3>
+
+                <p className="text-sm leading-7 text-gray-300">
+                  {analysis.doctorReview}
+                </p>
+              </div>
+            )}
+
+            {/* RAW FALLBACK */}
+            {analysis.rawAnalysis && (
+              <div className="rounded-xl border border-white/10 bg-black/20 p-5">
+                <h3 className="mb-3 font-semibold">
+                  AI Analysis
+                </h3>
+
+                <pre className="whitespace-pre-wrap text-sm leading-6 text-gray-300">
+                  {analysis.rawAnalysis}
+                </pre>
+              </div>
+            )}
+
+            {/* SAFETY NOTICE */}
+            <div className="mt-5 rounded-xl border border-red-400/10 bg-red-400/[0.03] p-4">
+              <p className="text-xs leading-5 text-gray-500">
+                <span className="font-semibold text-red-300">
+                  Important:
+                </span>{" "}
+                This AI analysis is informational and is not a medical
+                diagnosis. Medical decisions should be made by a qualified
+                healthcare professional.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* SAVED RECORDS */}
         <section>
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold">Your Health Records</h2>
+              <h2 className="text-xl font-semibold">
+                Your Health Records
+              </h2>
 
               <p className="mt-1 text-sm text-gray-400">
-                {records.length} record{records.length !== 1 ? "s" : ""} saved
+                {records.length} record
+                {records.length !== 1 ? "s" : ""} saved
               </p>
             </div>
           </div>
@@ -470,6 +779,7 @@ export default function HealthRecordsPage() {
                   className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-400/30"
                 >
                   <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+
                     <div className="flex min-w-0 items-start gap-4">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-2xl">
                         {record.fileType === "application/pdf"
@@ -486,7 +796,9 @@ export default function HealthRecordsPage() {
                           <span>{record.type}</span>
                           <span>{record.date}</span>
                           <span>{record.fileName}</span>
-                          <span>{formatFileSize(record.fileSize)}</span>
+                          <span>
+                            {formatFileSize(record.fileSize)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -504,7 +816,9 @@ export default function HealthRecordsPage() {
                         disabled={deletingId === record.id}
                         className="rounded-lg border border-red-400/30 px-4 py-2 text-sm font-medium text-red-300 transition hover:bg-red-400/10 disabled:opacity-50"
                       >
-                        {deletingId === record.id ? "Deleting..." : "Delete"}
+                        {deletingId === record.id
+                          ? "Deleting..."
+                          : "Delete"}
                       </button>
                     </div>
                   </div>
@@ -514,16 +828,17 @@ export default function HealthRecordsPage() {
           )}
         </section>
 
-        {/* Notice */}
+        {/* NOTICE */}
         <div className="mt-8 rounded-2xl border border-cyan-400/10 bg-cyan-400/[0.03] p-5">
           <p className="text-sm leading-6 text-gray-400">
             <span className="font-semibold text-cyan-300">
               Health Records:
             </span>{" "}
-            Your uploaded reports are now stored through the Healthcare 360
+            Your uploaded reports are stored through the Healthcare 360
             backend and associated with your authenticated account.
           </p>
         </div>
+
       </div>
     </main>
   );

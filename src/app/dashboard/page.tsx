@@ -1,416 +1,376 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 
-type User = {
+type Appointment = {
   id: string;
-  name: string;
-  email: string;
-  phone?: string | null;
-  role: string;
+  date: string;
+  time: string;
+  status: string;
+  patient?: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
 };
 
-const services = [
-  {
-    icon: "🤖",
-    title: "AI Care Coordinator",
-    description:
-      "Your AI-powered healthcare coordination assistant.",
-    href: "/ai-care",
-    active: true,
-    button: "Open AI Care →",
-  },
-  {
-    icon: "👨‍⚕️",
-    title: "Doctor Consultation",
-    description:
-      "Connect with doctors for online consultation.",
-    href: "/doctor-consult",
-    active: true,
-    button: "Consult a Doctor →",
-  },
-  {
-    icon: "🧪",
-    title: "Lab Tests",
-    description:
-      "Book diagnostic tests and home sample collection.",
-    href: "/lab-tests",
-    active: true,
-    button: "Book Lab Test →",
-  },
-  {
-    icon: "📄",
-    title: "Health Records",
-    description:
-      "Manage your reports, prescriptions and health records.",
-    href: "/health-records",
-    active: true,
-    button: "Open Health Records →",
-  },
-  {
-    icon: "👩‍⚕️",
-    title: "Caregiver Booking",
-    description:
-      "Find and request home-care assistance.",
-    href: "/caregiver-booking",
-    active: true,
-    button: "Book Caregiver →",
-  },
-  {
-    icon: "📅",
-    title: "Appointments",
-    description:
-      "Manage your upcoming healthcare appointments.",
-    href: "/doctor-consult",
-    active: true,
-    button: "View Appointments →",
-  },
-];
-
-export default function Dashboard() {
-  const router = useRouter();
-
-  const [user, setUser] = useState<User | null>(null);
-  const [loadingUser, setLoadingUser] = useState(true);
-
-  const [appointmentCount, setAppointmentCount] = useState(0);
-  const [labBookingCount, setLabBookingCount] = useState(0);
-  const [recordCount, setRecordCount] = useState(0);
-  const [caregiverBookingCount, setCaregiverBookingCount] =
-    useState(0);
+export default function DoctorDashboard() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    async function loadDashboard() {
-      try {
-        // 1. Check logged-in user
-        const userResponse = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
+    loadAppointments();
+  }, []);
 
-        const userData = await userResponse.json();
-
-        if (
-          !userResponse.ok ||
-          !userData.authenticated ||
-          !userData.user
-        ) {
-          router.replace("/login");
-          return;
-        }
-
-        setUser(userData.user);
-
-        // 2. Load all dashboard data from database APIs
-        const [
-          appointmentResponse,
-          labResponse,
-          healthRecordResponse,
-          caregiverResponse,
-        ] = await Promise.all([
-          fetch("/api/appointments", {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          }),
-
-          fetch("/api/lab-bookings", {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          }),
-
-          fetch("/api/health-records", {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          }),
-
-          fetch("/api/caregiver-bookings", {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          }),
-        ]);
-
-        // Convert responses to JSON
-        const [
-          appointmentData,
-          labData,
-          healthRecordData,
-          caregiverData,
-        ] = await Promise.all([
-          appointmentResponse.json(),
-          labResponse.json(),
-          healthRecordResponse.json(),
-          caregiverResponse.json(),
-        ]);
-
-        // 3. Appointment count
-        if (appointmentResponse.ok) {
-          setAppointmentCount(
-            Array.isArray(appointmentData.appointments)
-              ? appointmentData.appointments.length
-              : 0
-          );
-        }
-
-        // 4. Lab booking count
-        if (labResponse.ok) {
-          setLabBookingCount(
-            Array.isArray(labData.bookings)
-              ? labData.bookings.length
-              : 0
-          );
-        }
-
-        // 5. Health records count
-        if (healthRecordResponse.ok) {
-          setRecordCount(
-            Array.isArray(healthRecordData.records)
-              ? healthRecordData.records.length
-              : 0
-          );
-        }
-
-        // 6. Caregiver booking count
-        if (caregiverResponse.ok) {
-          setCaregiverBookingCount(
-            Array.isArray(caregiverData.bookings)
-              ? caregiverData.bookings.length
-              : 0
-          );
-        }
-
-        console.log("DASHBOARD DATA:", {
-          appointments: appointmentData,
-          labBookings: labData,
-          healthRecords: healthRecordData,
-          caregiverBookings: caregiverData,
-        });
-      } catch (error) {
-        console.error("DASHBOARD LOAD ERROR:", error);
-        router.replace("/login");
-      } finally {
-        setLoadingUser(false);
-      }
-    }
-
-    loadDashboard();
-  }, [router]);
-
-  async function logout() {
+  async function loadAppointments() {
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error("LOGOUT ERROR:", error);
+      setLoading(true);
+
+      const response = await fetch(
+        "/api/appointments",
+        {
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(
+          data?.error ||
+            "Unable to load appointments."
+        );
+        return;
+      }
+
+      setAppointments(
+        Array.isArray(data)
+          ? data
+          : data.appointments || []
+      );
+    } catch {
+      setMessage(
+        "Unable to connect to server."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    router.replace("/login");
   }
 
-  if (loadingUser) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <div className="text-center">
-          <div className="text-4xl">🏥</div>
+  async function updateStatus(
+    appointmentId: string,
+    status: string
+  ) {
+    try {
+      setMessage("");
 
-          <p className="mt-4 text-slate-400">
-            Loading your healthcare dashboard...
-          </p>
-        </div>
-      </main>
-    );
+      const response = await fetch(
+        "/api/appointments",
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify({
+            appointmentId,
+            status,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(
+          data?.error ||
+            "Unable to update appointment."
+        );
+        return;
+      }
+
+      await loadAppointments();
+
+      setMessage(
+        `Appointment ${status.toLowerCase()}.`
+      );
+    } catch {
+      setMessage(
+        "Unable to update appointment."
+      );
+    }
   }
+
+  const pendingCount =
+    appointments.filter(
+      (item) =>
+        item.status === "PENDING"
+    ).length;
+
+  const confirmedCount =
+    appointments.filter(
+      (item) =>
+        item.status === "CONFIRMED"
+    ).length;
+
+  const completedCount =
+    appointments.filter(
+      (item) =>
+        item.status === "COMPLETED"
+    ).length;
+
+  const cancelledCount =
+    appointments.filter(
+      (item) =>
+        item.status === "CANCELLED"
+    ).length;
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      {/* Navbar */}
-      <nav className="border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link href="/dashboard">
-            <h1 className="text-2xl font-extrabold">
-              HEALTHCARE
-              <span className="text-cyan-400">360</span>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="mb-2 text-sm font-medium text-cyan-400">
+              HOMEHEALTH 360
+            </p>
+
+            <h1 className="text-3xl font-bold">
+              Doctor Dashboard
             </h1>
-          </Link>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden text-sm text-slate-400 sm:block">
-              {user?.name}
-            </span>
-
-            <button
-              onClick={logout}
-              className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold transition hover:border-red-400/40 hover:text-red-400"
-            >
-              Logout
-            </button>
+            <p className="mt-2 text-slate-400">
+              Manage your appointments and patients.
+            </p>
           </div>
+
+          <button
+            onClick={loadAppointments}
+            className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold transition hover:border-cyan-500 hover:bg-slate-800"
+          >
+            ↻ Refresh
+          </button>
         </div>
-      </nav>
 
-      {/* Welcome */}
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <p className="text-sm font-semibold text-cyan-400">
-          PATIENT DASHBOARD
-        </p>
-
-        <h1 className="mt-2 text-4xl font-extrabold tracking-tight">
-          Welcome, {user?.name} 👋
-        </h1>
-
-        <p className="mt-3 max-w-2xl text-slate-400">
-          Manage your healthcare services, appointments,
-          records and consultations from one place.
-        </p>
+        {/* Message */}
+        {message && (
+          <div className="mb-6 rounded-xl border border-cyan-800 bg-cyan-950/40 px-4 py-3 text-sm text-cyan-300">
+            {message}
+          </div>
+        )}
 
         {/* Stats */}
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Appointments */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-sm text-slate-500">
-              Appointments
+        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Pending
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
-              {appointmentCount}
-            </p>
-
-            <p className="mt-1 text-xs text-cyan-400">
-              From database
+            <p className="mt-2 text-3xl font-bold text-yellow-400">
+              {pendingCount}
             </p>
           </div>
 
-          {/* Lab Bookings */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-sm text-slate-500">
-              Lab Bookings
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Confirmed
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
-              {labBookingCount}
-            </p>
-
-            <p className="mt-1 text-xs text-cyan-400">
-              From database
+            <p className="mt-2 text-3xl font-bold text-cyan-400">
+              {confirmedCount}
             </p>
           </div>
 
-          {/* Health Records */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-sm text-slate-500">
-              Health Records
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Completed
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
-              {recordCount}
-            </p>
-
-            <p className="mt-1 text-xs text-cyan-400">
-              From database
+            <p className="mt-2 text-3xl font-bold text-green-400">
+              {completedCount}
             </p>
           </div>
 
-          {/* Caregiver Bookings */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-sm text-slate-500">
-              Caregiver Bookings
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-sm text-slate-400">
+              Cancelled
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
-              {caregiverBookingCount}
-            </p>
-
-            <p className="mt-1 text-xs text-cyan-400">
-              From database
+            <p className="mt-2 text-3xl font-bold text-red-400">
+              {cancelledCount}
             </p>
           </div>
+
         </div>
 
-        {/* Services */}
-        <div className="mt-12">
-          <div>
-            <p className="text-sm font-semibold text-cyan-400">
-              HEALTHCARE SERVICES
-            </p>
+        {/* Appointments */}
+        <section className="rounded-2xl border border-slate-800 bg-slate-900">
 
-            <h2 className="mt-2 text-2xl font-bold">
-              What would you like to do?
+          <div className="border-b border-slate-800 px-5 py-5">
+            <h2 className="text-xl font-semibold">
+              My Appointments
             </h2>
+
+            <p className="mt-1 text-sm text-slate-400">
+              View and manage patient appointments.
+            </p>
           </div>
 
-          <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
-              <div
-                key={service.title}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6 transition hover:border-cyan-400/30 hover:bg-white/[0.07]"
-              >
-                <div className="text-4xl">
-                  {service.icon}
-                </div>
-
-                <h3 className="mt-5 text-xl font-bold">
-                  {service.title}
-                </h3>
-
-                <p className="mt-2 min-h-12 text-sm leading-6 text-slate-400">
-                  {service.description}
-                </p>
-
-                {service.active ? (
-                  <Link
-                    href={service.href}
-                    className="mt-6 inline-block rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-                  >
-                    {service.button}
-                  </Link>
-                ) : (
-                  <span className="mt-6 inline-block rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-500">
-                    {service.button}
-                  </span>
-                )}
+          {loading ? (
+            <div className="px-5 py-12 text-center text-slate-400">
+              Loading appointments...
+            </div>
+          ) : appointments.length === 0 ? (
+            <div className="px-5 py-12 text-center">
+              <div className="text-4xl">
+                📅
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* AI Care */}
-        <div className="mt-12 rounded-3xl border border-cyan-400/20 bg-cyan-400/5 p-8">
-          <p className="text-sm font-semibold text-cyan-400">
-            AI CARE COORDINATOR
-          </p>
+              <p className="mt-4 text-lg font-medium">
+                No appointments yet
+              </p>
 
-          <h2 className="mt-2 text-3xl font-bold">
-            Your healthcare, coordinated in one place.
-          </h2>
+              <p className="mt-2 text-sm text-slate-400">
+                Patient appointments will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-800">
 
-          <p className="mt-3 max-w-2xl leading-7 text-slate-400">
-            Healthcare 360 connects your doctor consultations,
-            laboratory services, health records and caregiving
-            services through a unified healthcare experience.
-          </p>
+              {appointments.map(
+                (appointment) => (
+                  <div
+                    key={appointment.id}
+                    className="p-5 transition hover:bg-slate-800/40"
+                  >
 
-          <Link
-            href="/ai-care"
-            className="mt-6 inline-block rounded-xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 hover:bg-cyan-300"
-          >
-            Open AI Care Coordinator →
-          </Link>
-        </div>
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-        {/* Prototype Notice */}
-        <div className="mt-10 rounded-2xl border border-yellow-400/10 bg-yellow-400/5 p-5 text-sm leading-6 text-yellow-300/80">
-          Healthcare 360 is currently a software prototype.
-          Do not use this prototype for real medical emergencies.
-        </div>
-      </section>
+                      {/* Patient */}
+                      <div className="flex items-start gap-4">
+
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-xl">
+                          👤
+                        </div>
+
+                        <div>
+                          <h3 className="font-semibold">
+                            {appointment.patient?.name ||
+                              "Patient"}
+                          </h3>
+
+                          <p className="mt-1 text-sm text-slate-400">
+                            {appointment.patient?.email ||
+                              "Email not available"}
+                          </p>
+
+                          {appointment.patient?.phone && (
+                            <p className="mt-1 text-sm text-slate-400">
+                              {appointment.patient.phone}
+                            </p>
+                          )}
+                        </div>
+
+                      </div>
+
+                      {/* Appointment details */}
+                      <div className="flex flex-wrap gap-3 text-sm">
+
+                        <div className="rounded-lg bg-slate-800 px-4 py-2">
+                          📅 {appointment.date}
+                        </div>
+
+                        <div className="rounded-lg bg-slate-800 px-4 py-2">
+                          🕐 {appointment.time}
+                        </div>
+
+                        <div
+                          className={`rounded-lg px-4 py-2 font-medium ${
+                            appointment.status ===
+                            "CONFIRMED"
+                              ? "bg-cyan-950 text-cyan-300"
+                              : appointment.status ===
+                                "COMPLETED"
+                              ? "bg-green-950 text-green-300"
+                              : appointment.status ===
+                                "CANCELLED"
+                              ? "bg-red-950 text-red-300"
+                              : "bg-yellow-950 text-yellow-300"
+                          }`}
+                        >
+                          {appointment.status}
+                        </div>
+
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap gap-2">
+
+                        {appointment.status ===
+                          "PENDING" && (
+                          <>
+                            <button
+                              onClick={() =>
+                                updateStatus(
+                                  appointment.id,
+                                  "CONFIRMED"
+                                )
+                              }
+                              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold transition hover:bg-cyan-500"
+                            >
+                              Confirm
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                updateStatus(
+                                  appointment.id,
+                                  "CANCELLED"
+                                )
+                              }
+                              className="rounded-lg border border-red-800 px-4 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-950"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+
+                        {appointment.status ===
+                          "CONFIRMED" && (
+                          <button
+                            onClick={() =>
+                              updateStatus(
+                                appointment.id,
+                                "COMPLETED"
+                              )
+                            }
+                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold transition hover:bg-green-500"
+                          >
+                            Mark Completed
+                          </button>
+                        )}
+
+                      </div>
+
+                    </div>
+
+                  </div>
+                )
+              )}
+
+            </div>
+          )}
+
+        </section>
+
+      </div>
     </main>
   );
 }

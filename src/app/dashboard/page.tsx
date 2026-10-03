@@ -1,374 +1,275 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-type Appointment = {
+type User = {
   id: string;
-  date: string;
-  time: string;
-  status: string;
-  patient?: {
-    name: string;
-    email: string;
-    phone?: string | null;
-  };
+  name: string;
+  email: string;
+  phone?: string | null;
+  role: "PATIENT" | "DOCTOR" | "ADMIN";
 };
 
-export default function DoctorDashboard() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+export default function PatientDashboard() {
+  const router = useRouter();
+
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    loadAppointments();
+    loadUser();
   }, []);
 
-  async function loadAppointments() {
+  async function loadUser() {
     try {
-      setLoading(true);
-
-      const response = await fetch(
-        "/api/appointments",
-        {
-          credentials: "include",
-        }
-      );
+      const response = await fetch("/api/auth/me", {
+        credentials: "include",
+        cache: "no-store",
+      });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setMessage(
-          data?.error ||
-            "Unable to load appointments."
-        );
+      if (!response.ok || !data?.authenticated || !data?.user) {
+        router.replace("/login");
         return;
       }
 
-      setAppointments(
-        Array.isArray(data)
-          ? data
-          : data.appointments || []
-      );
-    } catch {
-      setMessage(
-        "Unable to connect to server."
-      );
+      const currentUser: User = data.user;
+
+      if (currentUser.role === "DOCTOR") {
+        router.replace("/doctor/dashboard");
+        return;
+      }
+
+      if (currentUser.role === "ADMIN") {
+        router.replace("/admin/dashboard");
+        return;
+      }
+
+      setUser(currentUser);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load your account.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function updateStatus(
-    appointmentId: string,
-    status: string
-  ) {
-    try {
-      setMessage("");
-
-      const response = await fetch(
-        "/api/appointments",
-        {
-          method: "PATCH",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          credentials: "include",
-
-          body: JSON.stringify({
-            appointmentId,
-            status,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(
-          data?.error ||
-            "Unable to update appointment."
-        );
-        return;
-      }
-
-      await loadAppointments();
-
-      setMessage(
-        `Appointment ${status.toLowerCase()}.`
-      );
-    } catch {
-      setMessage(
-        "Unable to update appointment."
-      );
-    }
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-700 border-t-cyan-400" />
+          <p className="text-slate-400">
+            Loading your dashboard...
+          </p>
+        </div>
+      </main>
+    );
   }
 
-  const pendingCount =
-    appointments.filter(
-      (item) =>
-        item.status === "PENDING"
-    ).length;
+  if (error) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-center">
+          <h1 className="text-xl font-bold text-red-400">
+            Something went wrong
+          </h1>
 
-  const confirmedCount =
-    appointments.filter(
-      (item) =>
-        item.status === "CONFIRMED"
-    ).length;
+          <p className="mt-3 text-slate-300">
+            {error}
+          </p>
 
-  const completedCount =
-    appointments.filter(
-      (item) =>
-        item.status === "COMPLETED"
-    ).length;
+          <button
+            onClick={loadUser}
+            className="mt-6 rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950"
+          >
+            Try Again
+          </button>
+        </div>
+      </main>
+    );
+  }
 
-  const cancelledCount =
-    appointments.filter(
-      (item) =>
-        item.status === "CANCELLED"
-    ).length;
+  if (!user) {
+    return null;
+  }
+
+  const services = [
+    {
+      title: "AI Care Coordinator",
+      description:
+        "Get AI-powered healthcare guidance and assistance.",
+      href: "/ai-care",
+      icon: "🤖",
+    },
+    {
+      title: "Doctor Consultation",
+      description:
+        "Find doctors and book your online consultation.",
+      href: "/doctor-consult",
+      icon: "👨‍⚕️",
+    },
+    {
+      title: "Lab Tests",
+      description:
+        "Book diagnostic tests and home sample collection.",
+      href: "/lab-tests",
+      icon: "🧪",
+    },
+    {
+      title: "Caregiver Booking",
+      description:
+        "Book healthcare caregivers for home assistance.",
+      href: "/caregiver-booking",
+      icon: "🧑‍⚕️",
+    },
+    {
+      title: "Health Records",
+      description:
+        "Manage your medical reports and health records.",
+      href: "/health-records",
+      icon: "📋",
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="mb-2 text-sm font-medium text-cyan-400">
+            <p className="mb-2 text-sm font-semibold tracking-wide text-cyan-400">
               HOMEHEALTH 360
             </p>
 
-            <h1 className="text-3xl font-bold">
-              Doctor Dashboard
+            <h1 className="text-3xl font-bold sm:text-4xl">
+              Patient Dashboard
             </h1>
 
             <p className="mt-2 text-slate-400">
-              Manage your appointments and patients.
+              Welcome back, {user.name}.
             </p>
           </div>
 
-          <button
-            onClick={loadAppointments}
-            className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold transition hover:border-cyan-500 hover:bg-slate-800"
-          >
-            ↻ Refresh
-          </button>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              Account
+            </p>
+
+            <p className="mt-1 font-semibold text-cyan-400">
+              Patient
+            </p>
+          </div>
         </div>
 
-        {/* Message */}
-        {message && (
-          <div className="mb-6 rounded-xl border border-cyan-800 bg-cyan-950/40 px-4 py-3 text-sm text-cyan-300">
-            {message}
-          </div>
-        )}
+        <section className="mb-8 rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 via-slate-900 to-slate-950 p-6 sm:p-8">
+          <p className="text-sm font-semibold text-cyan-400">
+            YOUR HEALTHCARE HUB
+          </p>
 
-        {/* Stats */}
-        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <h2 className="mt-3 text-2xl font-bold sm:text-3xl">
+            Your healthcare, connected in one place.
+          </h2>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">
-              Pending
-            </p>
+          <p className="mt-4 max-w-3xl leading-7 text-slate-400">
+            Access AI healthcare assistance, doctor consultations,
+            lab services, caregivers, and your health records from
+            one dashboard.
+          </p>
+        </section>
 
-            <p className="mt-2 text-3xl font-bold text-yellow-400">
-              {pendingCount}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">
-              Confirmed
-            </p>
-
-            <p className="mt-2 text-3xl font-bold text-cyan-400">
-              {confirmedCount}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">
-              Completed
-            </p>
-
-            <p className="mt-2 text-3xl font-bold text-green-400">
-              {completedCount}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p className="text-sm text-slate-400">
-              Cancelled
-            </p>
-
-            <p className="mt-2 text-3xl font-bold text-red-400">
-              {cancelledCount}
-            </p>
-          </div>
-
-        </div>
-
-        {/* Appointments */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-900">
-
-          <div className="border-b border-slate-800 px-5 py-5">
-            <h2 className="text-xl font-semibold">
-              My Appointments
+        <section>
+          <div className="mb-5">
+            <h2 className="text-2xl font-bold">
+              Healthcare Services
             </h2>
 
             <p className="mt-1 text-sm text-slate-400">
-              View and manage patient appointments.
+              Choose a service to continue.
             </p>
           </div>
 
-          {loading ? (
-            <div className="px-5 py-12 text-center text-slate-400">
-              Loading appointments...
-            </div>
-          ) : appointments.length === 0 ? (
-            <div className="px-5 py-12 text-center">
-              <div className="text-4xl">
-                📅
-              </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service) => (
+              <Link
+                key={service.href}
+                href={service.href}
+                className="group rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-cyan-500/50 hover:bg-slate-800"
+              >
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/10 text-2xl">
+                  {service.icon}
+                </div>
 
-              <p className="mt-4 text-lg font-medium">
-                No appointments yet
-              </p>
+                <h3 className="text-lg font-bold">
+                  {service.title}
+                </h3>
 
-              <p className="mt-2 text-sm text-slate-400">
-                Patient appointments will appear here.
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-800">
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  {service.description}
+                </p>
 
-              {appointments.map(
-                (appointment) => (
-                  <div
-                    key={appointment.id}
-                    className="p-5 transition hover:bg-slate-800/40"
-                  >
-
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
-                      {/* Patient */}
-                      <div className="flex items-start gap-4">
-
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-xl">
-                          👤
-                        </div>
-
-                        <div>
-                          <h3 className="font-semibold">
-                            {appointment.patient?.name ||
-                              "Patient"}
-                          </h3>
-
-                          <p className="mt-1 text-sm text-slate-400">
-                            {appointment.patient?.email ||
-                              "Email not available"}
-                          </p>
-
-                          {appointment.patient?.phone && (
-                            <p className="mt-1 text-sm text-slate-400">
-                              {appointment.patient.phone}
-                            </p>
-                          )}
-                        </div>
-
-                      </div>
-
-                      {/* Appointment details */}
-                      <div className="flex flex-wrap gap-3 text-sm">
-
-                        <div className="rounded-lg bg-slate-800 px-4 py-2">
-                          📅 {appointment.date}
-                        </div>
-
-                        <div className="rounded-lg bg-slate-800 px-4 py-2">
-                          🕐 {appointment.time}
-                        </div>
-
-                        <div
-                          className={`rounded-lg px-4 py-2 font-medium ${
-                            appointment.status ===
-                            "CONFIRMED"
-                              ? "bg-cyan-950 text-cyan-300"
-                              : appointment.status ===
-                                "COMPLETED"
-                              ? "bg-green-950 text-green-300"
-                              : appointment.status ===
-                                "CANCELLED"
-                              ? "bg-red-950 text-red-300"
-                              : "bg-yellow-950 text-yellow-300"
-                          }`}
-                        >
-                          {appointment.status}
-                        </div>
-
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex flex-wrap gap-2">
-
-                        {appointment.status ===
-                          "PENDING" && (
-                          <>
-                            <button
-                              onClick={() =>
-                                updateStatus(
-                                  appointment.id,
-                                  "CONFIRMED"
-                                )
-                              }
-                              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold transition hover:bg-cyan-500"
-                            >
-                              Confirm
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                updateStatus(
-                                  appointment.id,
-                                  "CANCELLED"
-                                )
-                              }
-                              className="rounded-lg border border-red-800 px-4 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-950"
-                            >
-                              Cancel
-                            </button>
-                          </>
-                        )}
-
-                        {appointment.status ===
-                          "CONFIRMED" && (
-                          <button
-                            onClick={() =>
-                              updateStatus(
-                                appointment.id,
-                                "COMPLETED"
-                              )
-                            }
-                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold transition hover:bg-green-500"
-                          >
-                            Mark Completed
-                          </button>
-                        )}
-
-                      </div>
-
-                    </div>
-
-                  </div>
-                )
-              )}
-
-            </div>
-          )}
-
+                <div className="mt-5 text-sm font-semibold text-cyan-400">
+                  Open Service →
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
+
+        <section className="mt-10 rounded-2xl border border-slate-800 bg-slate-900">
+          <div className="border-b border-slate-800 px-6 py-5">
+            <h2 className="text-xl font-bold">
+              Account Information
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-400">
+              Your registered account details.
+            </p>
+          </div>
+
+          <div className="grid gap-5 p-6 md:grid-cols-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Name
+              </p>
+
+              <p className="mt-2 font-semibold">
+                {user.name}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Email
+              </p>
+
+              <p className="mt-2 break-all font-semibold">
+                {user.email}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Phone
+              </p>
+
+              <p className="mt-2 font-semibold">
+                {user.phone || "Not provided"}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-8 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-5">
+          <p className="text-sm leading-6 text-yellow-300">
+            Healthcare 360 is currently a software prototype.
+            Do not use this prototype for real medical emergencies.
+          </p>
+        </div>
 
       </div>
     </main>

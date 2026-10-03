@@ -13,8 +13,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   async function loginUser() {
-    console.log("LOGIN BUTTON CLICKED");
-
     setError("");
 
     if (!email.trim() || !password) {
@@ -25,8 +23,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      console.log("SENDING LOGIN REQUEST");
-
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -38,11 +34,7 @@ export default function Login() {
         }),
       });
 
-      console.log("LOGIN RESPONSE STATUS:", response.status);
-
       const data = await response.json();
-
-      console.log("LOGIN RESPONSE:", data);
 
       if (!response.ok) {
         setError(data.error || "Invalid email or password.");
@@ -50,12 +42,34 @@ export default function Login() {
         return;
       }
 
-      console.log("LOGIN SUCCESS");
+      // Get the logged-in user's actual role
+      const meResponse = await fetch("/api/auth/me", {
+        cache: "no-store",
+      });
 
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("LOGIN ERROR:", error);
+      if (!meResponse.ok) {
+        router.replace("/dashboard");
+        return;
+      }
 
+      const meData = await meResponse.json();
+
+      const role = meData?.user?.role;
+
+      if (role === "DOCTOR") {
+        router.replace("/doctor/dashboard");
+        return;
+      }
+
+      if (role === "ADMIN") {
+        router.replace("/admin/dashboard");
+        return;
+      }
+
+      // PATIENT
+      router.replace("/dashboard");
+    } catch (err) {
+      console.error(err);
       setError("Something went wrong. Please try again.");
       setLoading(false);
     }

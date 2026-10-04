@@ -27,6 +27,14 @@ enum BookingStatus {
   COMPLETED
 }
 
+enum DoctorVerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
 model User {
   id                String             @id @default(cuid())
   name              String
@@ -39,6 +47,7 @@ model User {
   labBookings       LabBooking[]
   caregiverBookings CaregiverBooking[]
   healthRecords     HealthRecord[]
+  doctorApplication DoctorApplication?
 
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -122,4 +131,44 @@ model HealthRecord {
   patient User @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+model DoctorApplication {
+  id        String @id @default(cuid())
+  userId    String @unique
+
+  fullName  String
+  email     String
+  mobile    String
+
+  medicalRegistrationNumber String
+
+  specialization String
+  qualification  String
+  experience     String
+  dob            String
+
+  clinicHospital String
+  clinicAddress  String?
+
+  identityDocumentName String
+  identityDocumentType String
+  identityDocumentData String
+
+  medicalCertificateName String
+  medicalCertificateType String
+  medicalCertificateData String
+
+  otherDocuments String?
+
+  status DoctorVerificationStatus @default(PENDING)
+
+  adminNotes  String?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

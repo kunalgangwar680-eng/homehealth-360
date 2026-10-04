@@ -18,7 +18,7 @@ export default function AICarePage() {
     {
       role: "assistant",
       content:
-        "Hello! 👋 I’m your Healthcare 360 AI Care Coordinator. Tell me what healthcare help you need.",
+        "Hello! 👋 I’m your Healthcare 360 AI Care Coordinator. You can ask me any general health question, including personal health concerns. I’ll guide you safely and suggest when you should consult a doctor.",
     },
   ]);
 
@@ -31,18 +31,33 @@ export default function AICarePage() {
       return;
     }
 
-    setMessages((previous) => [
-      ...previous,
+    const updatedMessages: Message[] = [
+      ...messages,
       {
         role: "user",
         content: trimmedMessage,
       },
-    ]);
+    ];
 
+    setMessages(updatedMessages);
     setMessage("");
     setLoading(true);
 
     try {
+      // Send only the recent conversation to keep the request fast.
+      const recentConversation = updatedMessages.slice(-12);
+
+      const conversation = recentConversation
+        .map((item) => {
+          const speaker =
+            item.role === "user"
+              ? "User"
+              : "AI Care Coordinator";
+
+          return `${speaker}: ${item.content}`;
+        })
+        .join("\n\n");
+
       const response = await fetch("/api/ai-care", {
         method: "POST",
         headers: {
@@ -51,6 +66,7 @@ export default function AICarePage() {
         credentials: "include",
         body: JSON.stringify({
           message: trimmedMessage,
+          conversation,
         }),
       });
 
@@ -79,12 +95,14 @@ export default function AICarePage() {
         );
       }
 
+      const aiReply =
+        data?.reply || "The AI returned an empty response.";
+
       setMessages((previous) => [
         ...previous,
         {
           role: "assistant",
-          content:
-            data?.reply || "The AI returned an empty response.",
+          content: aiReply,
         },
       ]);
     } catch (error: any) {
@@ -147,8 +165,9 @@ export default function AICarePage() {
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
-                  Get guidance about doctor consultation, lab tests,
-                  health records and caregiver services.
+                  Get guidance about personal health concerns, doctor
+                  consultation, lab tests, health records and caregiver
+                  services.
                 </p>
               </div>
 
@@ -315,7 +334,7 @@ export default function AICarePage() {
                 onChange={(event) => {
                   setMessage(event.target.value);
                 }}
-                placeholder="Tell me what healthcare help you need..."
+                placeholder="Ask anything about your health..."
                 disabled={loading}
                 className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-slate-600"
               />
@@ -331,8 +350,8 @@ export default function AICarePage() {
             </div>
 
             <p className="mt-3 text-center text-xs text-slate-600">
-              AI guidance is for general information and does not
-              replace a qualified medical professional.
+              AI guidance is for general information and does not replace
+              a qualified medical professional.
             </p>
 
           </form>

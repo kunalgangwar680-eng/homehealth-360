@@ -15,15 +15,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      /*
-        =========================================================
-        IMPORTANT:
-        YAHAN APNA EXISTING LOGIN API / LOGIN LOGIC RAKHNA HAI.
-        Aapka backend already working hai, isliye usko change
-        mat karna.
-        =========================================================
-      */
-
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -64,7 +55,6 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-[#f6f8f5] text-[#17362d]">
-
       <div className="grid min-h-screen lg:grid-cols-2">
 
         {/* =====================================================
@@ -89,12 +79,6 @@ export default function LoginPage() {
             />
           </video>
 
-          {/* 
-            VIDEO VISIBILITY
-            Pehle dark overlay zyada tha.
-            Ab video ko clearly visible rakha hai.
-          */}
-
           <div className="absolute inset-0 bg-[#073b2f]/55" />
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#0b2d24]/95 via-[#0b2d24]/35 to-[#0b2d24]/30" />
@@ -106,12 +90,10 @@ export default function LoginPage() {
           ================================================= */}
 
           <div className="relative z-10 px-8 pt-8 sm:px-10 lg:px-12 lg:pt-10">
-
             <Link
               href="/"
               className="inline-flex items-center gap-3"
             >
-
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
                 <span className="text-sm text-[#0c8068]">
                   ♡
@@ -119,7 +101,6 @@ export default function LoginPage() {
               </div>
 
               <div className="leading-none">
-
                 <div className="text-[13px] font-semibold tracking-[-0.02em] text-white">
                   HOMEHEALTH
                 </div>
@@ -127,11 +108,8 @@ export default function LoginPage() {
                 <div className="mt-1 text-[7px] font-bold tracking-[0.08em] text-white/80">
                   360
                 </div>
-
               </div>
-
             </Link>
-
           </div>
 
           {/* =================================================
@@ -143,36 +121,29 @@ export default function LoginPage() {
             {/* BADGE */}
 
             <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-[#9ed9c1]/30 bg-[#0c5a47]/50 px-3 py-1.5 backdrop-blur-md">
-
               <span className="h-1.5 w-1.5 rounded-full bg-[#c7f3d8]" />
 
               <span className="text-[10px] font-medium tracking-[0.03em] text-[#d6f3e2]">
                 Private health intelligence, centered on you
               </span>
-
             </div>
 
             {/* HEADLINE */}
 
             <h1 className="max-w-[620px] text-5xl font-normal leading-[0.98] tracking-[-0.045em] text-white sm:text-6xl lg:text-[4.3rem] xl:text-[4.8rem]">
-
               Your health story,
               <br />
-
               clearly connected.
-
             </h1>
 
             {/* DESCRIPTION */}
 
             <p className="mt-6 max-w-[570px] text-sm leading-6 text-white/75 sm:text-base sm:leading-7">
-
               Bring reports, appointments, reminders, and trusted family
               <br className="hidden sm:block" />
               support into one calm, secure place—guided by responsible
               <br className="hidden sm:block" />
               AI.
-
             </p>
 
             {/* =================================================
@@ -192,7 +163,6 @@ export default function LoginPage() {
                   </div>
 
                   <div>
-
                     <p className="text-[11px] font-medium text-white">
                       Good morning, Alex
                     </p>
@@ -200,7 +170,6 @@ export default function LoginPage() {
                     <p className="mt-0.5 text-[9px] text-white/50">
                       Health record updated today
                     </p>
-
                   </div>
 
                 </div>
@@ -282,7 +251,6 @@ export default function LoginPage() {
             {/* HEADER */}
 
             <div>
-
               <h2 className="text-[25px] font-semibold tracking-[-0.035em] text-[#183b32]">
                 Welcome back
               </h2>
@@ -290,7 +258,6 @@ export default function LoginPage() {
               <p className="mt-1 max-w-[270px] text-[12px] leading-[1.35] text-[#8b9892]">
                 Sign in to continue to your personal health workspace.
               </p>
-
             </div>
 
             {/* GOOGLE */}
@@ -299,13 +266,11 @@ export default function LoginPage() {
               type="button"
               className="mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#dfe5e1] bg-white text-[13px] font-medium text-[#45534d] transition hover:bg-[#f8faf8]"
             >
-
               <span className="flex h-4 w-4 items-center justify-center text-[11px] font-bold text-[#4285f4]">
                 ■
               </span>
 
               Continue with Google
-
             </button>
 
             {/* DIVIDER */}
@@ -332,7 +297,6 @@ export default function LoginPage() {
               {/* EMAIL */}
 
               <div>
-
                 <label
                   htmlFor="email"
                   className="mb-1.5 block text-[11px] font-medium text-[#53615b]"
@@ -349,13 +313,11 @@ export default function LoginPage() {
                   required
                   className="h-10 w-full rounded-lg border border-[#dfe5e1] bg-white px-3 text-[13px] text-[#243d34] outline-none transition placeholder:text-[#8d9893] focus:border-[#21866c] focus:ring-2 focus:ring-[#21866c]/10"
                 />
-
               </div>
 
               {/* PASSWORD */}
 
               <div>
-
                 <label
                   htmlFor="password"
                   className="mb-1.5 block text-[11px] font-medium text-[#53615b]"
@@ -372,7 +334,6 @@ export default function LoginPage() {
                   required
                   className="h-10 w-full rounded-lg border border-[#dfe5e1] bg-white px-3 text-[13px] text-[#243d34] outline-none transition placeholder:text-[#8d9893] focus:border-[#21866c] focus:ring-2 focus:ring-[#21866c]/10"
                 />
-
               </div>
 
               {/* REMEMBER + FORGOT */}
@@ -408,13 +369,11 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-1 h-10 rounded-lg bg-[#087c64] px-5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-[#076e59] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1 h-10 w-full rounded-lg bg-[#087c64] px-5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-[#076e59] disabled:cursor-not-allowed disabled:opacity-60"
               >
-
                 {loading
                   ? "Signing in..."
                   : "→ Sign in securely"}
-
               </button>
 
             </form>
@@ -428,6 +387,77 @@ export default function LoginPage() {
               Sign in with a passkey
             </button>
 
+            {/* =================================================
+                CREATE ACCOUNT
+            ================================================= */}
+
+            <div className="my-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-[#e1e6e2]" />
+
+              <span className="text-[9px] font-medium tracking-[0.08em] text-[#99a39e]">
+                NEW HERE?
+              </span>
+
+              <div className="h-px flex-1 bg-[#e1e6e2]" />
+            </div>
+
+            <Link
+              href="/signup"
+              className="group flex w-full items-center justify-center gap-3 rounded-lg border border-[#cfe2d9] bg-[#f4faf6] px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#21866c] hover:bg-[#edf8f1] hover:shadow-sm"
+            >
+
+              {/* USER PLUS ICON */}
+
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#187762] shadow-sm transition-colors group-hover:bg-[#087c64] group-hover:text-white">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                >
+                  <path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M19 8v6" />
+                  <path d="M22 11h-6" />
+                </svg>
+              </div>
+
+              {/* TEXT */}
+
+              <div className="text-left">
+                <p className="text-[12px] font-semibold text-[#183b32] group-hover:text-[#087c64]">
+                  Create Account
+                </p>
+
+                <p className="mt-0.5 text-[9px] text-[#7f8c86]">
+                  New to HOMEHEALTH 360? Get started here.
+                </p>
+              </div>
+
+              {/* ARROW */}
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="ml-auto h-4 w-4 text-[#21866c] transition-transform duration-200 group-hover:translate-x-1"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
+              </svg>
+
+            </Link>
+
           </div>
 
         </section>
@@ -439,7 +469,6 @@ export default function LoginPage() {
       ===================================================== */}
 
       <style jsx global>{`
-
         html,
         body {
           margin: 0;
@@ -459,23 +488,17 @@ export default function LoginPage() {
         }
 
         @media (max-width: 1023px) {
-
           .login-mobile-left {
             min-height: 650px;
           }
-
         }
 
         @media (max-width: 640px) {
-
           h1 {
             font-size: 3rem !important;
           }
-
         }
-
       `}</style>
-
     </main>
   );
 }

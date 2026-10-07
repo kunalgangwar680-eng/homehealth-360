@@ -1,328 +1,398 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type User = {
   id: string;
-  name: string;
-  email: string;
-  phone?: string | null;
-  role: string;
+  name?: string | null;
+  email?: string | null;
+  role?: string | null;
 };
 
-type CareNetworkItem = {
-  title: string;
-  status: string;
-  description: string;
-};
+type IconName =
+  | "home"
+  | "upload"
+  | "timeline"
+  | "gap"
+  | "bell"
+  | "ai"
+  | "lab"
+  | "family"
+  | "privacy"
+  | "search"
+  | "file"
+  | "eye"
+  | "vaccine"
+  | "arrow"
+  | "chevron"
+  | "menu"
+  | "close"
+  | "logout";
 
-const careNetwork: CareNetworkItem[] = [
+const navItems = [
   {
-    title: "AI Care Coordinator",
-    status: "ACTIVE",
-    description: "AI-guided care coordination",
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: "home" as IconName,
   },
   {
-    title: "Doctor Network",
-    status: "AVAILABLE",
-    description: "Connected medical specialists",
-  },
-  {
-    title: "Diagnostics",
-    status: "READY",
-    description: "Lab and diagnostic services",
-  },
-  {
-    title: "Health Records",
-    status: "CONNECTED",
-    description: "Digital health record system",
-  },
-  {
-    title: "Care Follow-up",
-    status: "ACTIVE",
-    description: "Continuous care tracking",
-  },
-];
-
-const quickActions = [
-  {
-    title: "AI Care",
-    subtitle: "Start an intelligent care conversation",
-    href: "/ai-care",
-    icon: "✦",
-  },
-  {
-    title: "Need a Doctor?",
-    subtitle: "Continue to doctor consultation",
-    href: "/doctor-consult",
-    icon: "◎",
-  },
-  {
-    title: "Need Diagnostics?",
-    subtitle: "Explore available lab services",
-    href: "/lab-tests",
-    icon: "⌁",
-  },
-  {
-    title: "View Records",
-    subtitle: "Access your digital health records",
+    label: "Upload report",
     href: "/health-records",
-    icon: "▣",
+    icon: "upload" as IconName,
+  },
+  {
+    label: "Health timeline",
+    href: "/health-timeline",
+    icon: "timeline" as IconName,
+  },
+  {
+    label: "Care gaps",
+    href: "/care-gaps",
+    icon: "gap" as IconName,
+  },
+  {
+    label: "Reminders",
+    href: "/reminders",
+    icon: "bell" as IconName,
+  },
+  {
+    label: "AI Care Copilot",
+    href: "/ai-care",
+    icon: "ai" as IconName,
+  },
+  {
+    label: "Lab Tests",
+    href: "/lab-tests",
+    icon: "lab" as IconName,
+  },
+  {
+    label: "Family healthcare",
+    href: "/family",
+    icon: "family" as IconName,
+  },
+  {
+    label: "Privacy center",
+    href: "/privacy",
+    icon: "privacy" as IconName,
   },
 ];
 
-const journeyItems = [
+const nextActions = [
   {
-    number: "01",
-    title: "Patient",
-    subtitle: "Your healthcare need",
+    title: "Schedule a diabetic eye screening",
+    subtitle: "Recommended this month Â· based on care guideline",
+    icon: "eye" as IconName,
+    href: "/care-gaps",
   },
   {
-    number: "02",
-    title: "AI Care",
-    subtitle: "Understand & coordinate",
+    title: "Review your new lab summary",
+    subtitle: "3-minute read Â· processed today",
+    icon: "file" as IconName,
+    href: "/health-records",
   },
   {
-    number: "03",
-    title: "Doctor",
-    subtitle: "Clinical consultation",
-  },
-  {
-    number: "04",
-    title: "Diagnostics",
-    subtitle: "Tests & reports",
-  },
-  {
-    number: "05",
-    title: "Follow-up",
-    subtitle: "Continuous care",
+    title: "Confirm flu vaccine",
+    subtitle: "Due before November",
+    icon: "vaccine" as IconName,
+    href: "/reminders",
   },
 ];
 
-function BackgroundSystem() {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 22 }, (_, index) => ({
-        id: index,
-        left: `${(index * 17.7) % 100}%`,
-        top: `${(index * 29.3) % 100}%`,
-        delay: `${(index % 8) * 0.8}s`,
-        duration: `${5 + (index % 5)}s`,
-        size: index % 3 === 0 ? 3 : 2,
-      })),
-    [],
-  );
-
-  return (
-    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#02070b]">
-      {/* Base grid */}
-      <div
-        className="absolute inset-0 opacity-[0.17]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(34,211,238,0.13) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,0.13) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-        }}
-      />
-
-      {/* Secondary small grid */}
-      <div
-        className="absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
-          `,
-          backgroundSize: "12px 12px",
-        }}
-      />
-
-      {/* Glow fields */}
-      <div className="absolute left-[8%] top-[8%] h-[420px] w-[420px] rounded-full bg-cyan-400/[0.045] blur-[120px] animate-dashOrbOne" />
-
-      <div className="absolute bottom-[5%] right-[4%] h-[500px] w-[500px] rounded-full bg-cyan-300/[0.035] blur-[140px] animate-dashOrbTwo" />
-
-      {/* Vertical energy beam */}
-      <div className="absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-cyan-400/[0.08] to-transparent" />
-
-      {/* Floating particles */}
-      {particles.map((particle) => (
-        <span
-          key={particle.id}
-          className="absolute rounded-full bg-cyan-300/60 animate-dashParticle"
-          style={{
-            left: particle.left,
-            top: particle.top,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            animationDelay: particle.delay,
-            animationDuration: particle.duration,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function AIOrb() {
-  return (
-    <div className="relative flex h-24 w-24 items-center justify-center">
-      {/* Outer rings */}
-      <div className="absolute inset-0 rounded-full border border-cyan-400/10 animate-aiRingOne" />
-
-      <div className="absolute inset-[7px] rounded-full border border-cyan-300/10 animate-aiRingTwo" />
-
-      <div className="absolute inset-[14px] rounded-full border border-cyan-400/15 border-dashed animate-aiRingThree" />
-
-      {/* Core glow */}
-      <div className="absolute h-12 w-12 rounded-full bg-cyan-400/[0.07] blur-xl animate-aiCoreGlow" />
-
-      {/* Core */}
-      <div className="relative flex h-10 w-10 items-center justify-center rounded-full border border-cyan-300/30 bg-[#07131a]/90 shadow-[0_0_30px_rgba(34,211,238,0.16)]">
-        <span className="text-sm text-cyan-300">✦</span>
-      </div>
-
-      <div className="absolute -bottom-3 whitespace-nowrap rounded-full border border-cyan-300/10 bg-[#061015]/90 px-2.5 py-1 text-[7px] font-semibold tracking-[0.18em] text-cyan-300/70">
-        AI CORE ONLINE
-      </div>
-    </div>
-  );
-}
-
-function StatusDot() {
-  return (
-    <span className="relative flex h-2.5 w-2.5 items-center justify-center">
-      <span className="absolute h-2.5 w-2.5 rounded-full bg-cyan-300/20 animate-statusPulse" />
-
-      <span className="relative h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_9px_rgba(103,232,249,0.75)]" />
-    </span>
-  );
-}
-
-function CareNetworkCard({
-  item,
-  index,
+function Icon({
+  name,
+  size = 20,
+  stroke = 1.8,
 }: {
-  item: CareNetworkItem;
-  index: number;
+  name: IconName;
+  size?: number;
+  stroke?: number;
 }) {
-  const delay = `${index * 0.18}s`;
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: stroke,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
 
-  return (
-    <div
-      className="care-network-entry group relative overflow-hidden rounded-xl border border-white/[0.055] bg-white/[0.018] px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:translate-x-1 hover:border-cyan-300/20 hover:bg-cyan-300/[0.035] hover:shadow-[0_0_26px_rgba(34,211,238,0.06)]"
-      style={
-        {
-          "--care-delay": delay,
-        } as React.CSSProperties & { "--care-delay": string }
-      }
-    >
-      {/* moving energy line */}
-      <span
-        className="pointer-events-none absolute inset-y-0 -left-24 w-20 bg-gradient-to-r from-transparent via-cyan-300/[0.10] to-transparent blur-md animate-careScan"
-        style={{
-          animationDelay: `${index * 0.5}s`,
-        }}
-      />
+  switch (name) {
+    case "home":
+      return (
+        <svg {...common}>
+          <path d="m3 10 9-7 9 7" />
+          <path d="M5 9.5V21h14V9.5" />
+          <path d="M9 21v-6h6v6" />
+        </svg>
+      );
 
-      {/* left accent */}
-      <span className="absolute bottom-0 left-0 top-0 w-px bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+    case "upload":
+      return (
+        <svg {...common}>
+          <path d="M12 16V4" />
+          <path d="m7 9 5-5 5 5" />
+          <path d="M5 19h14" />
+        </svg>
+      );
 
-      <div className="relative flex items-center gap-3">
-        <StatusDot />
+    case "timeline":
+      return (
+        <svg {...common}>
+          <path d="M5 4v16" />
+          <circle cx="5" cy="7" r="1.5" />
+          <circle cx="5" cy="12" r="1.5" />
+          <circle cx="5" cy="17" r="1.5" />
+          <path d="M10 7h8" />
+          <path d="M10 12h8" />
+          <path d="M10 17h8" />
+        </svg>
+      );
 
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[10px] font-medium text-slate-200 transition-colors duration-300 group-hover:text-cyan-100">
-            {item.title}
-          </div>
+    case "gap":
+      return (
+        <svg {...common}>
+          <path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3Z" />
+          <path d="M12 8v4" />
+          <path d="M12 15h.01" />
+        </svg>
+      );
 
-          <div className="mt-0.5 truncate text-[7px] tracking-wide text-slate-600">
-            {item.description}
-          </div>
-        </div>
+    case "bell":
+      return (
+        <svg {...common}>
+          <path d="M18 9a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+          <path d="M10 21h4" />
+        </svg>
+      );
 
-        <div className="shrink-0 text-right">
-          <div className="text-[6px] font-semibold tracking-[0.14em] text-cyan-300/60 transition-all duration-300 group-hover:text-cyan-200 group-hover:drop-shadow-[0_0_7px_rgba(103,232,249,0.35)]">
-            {item.status}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    case "ai":
+      return (
+        <svg {...common}>
+          <path d="M12 3 13.8 8.2 19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z" />
+          <path d="m19 16 .6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6L19 16Z" />
+        </svg>
+      );
+
+    case "lab":
+      return (
+        <svg {...common}>
+          <path d="M9 3v6.5L5 17a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-4-7.5V3" />
+          <path d="M7 15h10" />
+          <path d="M8 3h8" />
+          <path d="M9 18h.01" />
+          <path d="M12 18h.01" />
+          <path d="M15 18h.01" />
+        </svg>
+      );
+
+    case "family":
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3" />
+          <circle cx="17" cy="9" r="2.3" />
+          <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
+          <path d="M14.5 16a4.5 4.5 0 0 1 6 4" />
+        </svg>
+      );
+
+    case "privacy":
+      return (
+        <svg {...common}>
+          <path d="M12 3 19 6v5c0 4.7-3 8.4-7 10-4-1.6-7-5.3-7-10V6l7-3Z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      );
+
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="10.8" cy="10.8" r="6.2" />
+          <path d="m16 16 4.5 4.5" />
+        </svg>
+      );
+
+    case "file":
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l3 3v15H6z" />
+          <path d="M14 3v4h4" />
+          <path d="M9 12h6" />
+          <path d="M9 16h5" />
+        </svg>
+      );
+
+    case "eye":
+      return (
+        <svg {...common}>
+          <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+          <circle cx="12" cy="12" r="2.3" />
+        </svg>
+      );
+
+    case "vaccine":
+      return (
+        <svg {...common}>
+          <path d="m14 4 6 6" />
+          <path d="m16 2 6 6" />
+          <path d="m13 7-8.5 8.5" />
+          <path d="m10 10 4 4" />
+          <path d="M8 15 5 18" />
+          <path d="m4 19-1 2 2-1" />
+        </svg>
+      );
+
+    case "arrow":
+      return (
+        <svg {...common}>
+          <path d="M5 12h13" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      );
+
+    case "chevron":
+      return (
+        <svg {...common}>
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      );
+
+    case "menu":
+      return (
+        <svg {...common}>
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h16" />
+        </svg>
+      );
+
+    case "close":
+      return (
+        <svg {...common}>
+          <path d="m6 6 12 12" />
+          <path d="m18 6-12 12" />
+        </svg>
+      );
+
+    case "logout":
+      return (
+        <svg {...common}>
+          <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
+          <path d="m14 8 4 4-4 4" />
+          <path d="M18 12H9" />
+        </svg>
+      );
+
+    default:
+      return null;
+  }
 }
 
-function QuickActionCard({
-  title,
-  subtitle,
+function SidebarItem({
   href,
+  label,
   icon,
+  active = false,
+  onClick,
 }: {
-  title: string;
-  subtitle: string;
   href: string;
-  icon: string;
+  label: string;
+  icon: IconName;
+  active?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between rounded-xl border border-white/[0.055] bg-white/[0.018] px-3 py-2.5 transition-all duration-300 hover:border-cyan-300/20 hover:bg-cyan-300/[0.035] hover:shadow-[0_0_26px_rgba(34,211,238,0.05)]"
+      onClick={onClick}
+      className={[
+        "flex min-h-[42px] items-center gap-3 rounded-[10px] px-3 text-[13px] font-medium transition-all duration-200",
+        active
+          ? "bg-[#ffffff18] text-white"
+          : "text-[#c9d8d1] hover:bg-[#ffffff0d] hover:text-white",
+      ].join(" ")}
     >
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-300/10 bg-cyan-300/[0.04] text-[12px] text-cyan-300 transition-all duration-300 group-hover:border-cyan-300/20 group-hover:bg-cyan-300/[0.08] group-hover:shadow-[0_0_15px_rgba(34,211,238,0.08)]">
-          {icon}
-        </div>
-
-        <div className="min-w-0">
-          <div className="truncate text-[9px] font-medium text-slate-200 transition-colors group-hover:text-cyan-100">
-            {title}
-          </div>
-
-          <div className="mt-0.5 truncate text-[7px] text-slate-600">
-            {subtitle}
-          </div>
-        </div>
-      </div>
-
-      <span className="ml-3 text-[10px] text-cyan-300/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-cyan-200">
-        →
+      <span className="flex w-6 shrink-0 items-center justify-center">
+        <Icon name={icon} size={19} />
       </span>
+
+      <span>{label}</span>
     </Link>
   );
 }
 
-function JourneyCard({
-  number,
+function SnapshotCard({
   title,
+  value,
   subtitle,
+  highlighted = false,
 }: {
-  number: string;
   title: string;
+  value: string;
   subtitle: string;
+  highlighted?: boolean;
 }) {
   return (
-    <div className="group relative flex min-h-[88px] flex-1 flex-col justify-between rounded-xl border border-white/[0.055] bg-white/[0.018] p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
-      <div className="flex items-center justify-between">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-cyan-300/10 bg-cyan-300/[0.04] text-[7px] font-semibold text-cyan-300">
-          {number}
-        </div>
-
-        <span className="h-1.5 w-1.5 rounded-full bg-cyan-300/50 shadow-[0_0_8px_rgba(103,232,249,0.35)] transition-all duration-300 group-hover:scale-125 group-hover:bg-cyan-200" />
+    <div
+      className={[
+        "rounded-[16px] border px-5 py-5",
+        highlighted
+          ? "border-[#cfe0d6] bg-[#f0f7f2]"
+          : "border-[#e5e8e4] bg-white",
+      ].join(" ")}
+    >
+      <div className="text-[12px] font-medium text-[#7c8982]">
+        {title}
       </div>
 
-      <div>
-        <div className="text-[9px] font-medium text-slate-200">
-          {title}
-        </div>
+      <div className="mt-3 text-[27px] font-semibold tracking-[-0.035em] text-[#263a32]">
+        {value}
+      </div>
 
-        <div className="mt-1 text-[7px] text-slate-600">
-          {subtitle}
-        </div>
+      <div className="mt-3 text-[11px] leading-5 text-[#7e8983]">
+        {subtitle}
       </div>
     </div>
+  );
+}
+
+function NextActionCard({
+  title,
+  subtitle,
+  icon,
+  href,
+}: {
+  title: string;
+  subtitle: string;
+  icon: IconName;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-3 border-b border-[#e8ece8] py-4 last:border-b-0"
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#eef5ef] text-[#5f7f6e]">
+        <Icon name={icon} size={19} />
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14px] font-medium leading-5 text-[#394a42] group-hover:text-[#28634e]">
+          {title}
+        </span>
+
+        <span className="mt-0.5 block text-[10px] leading-4 text-[#858f89]">
+          {subtitle}
+        </span>
+      </span>
+
+      <span className="text-[#9da7a1] transition-transform group-hover:translate-x-0.5 group-hover:text-[#4c745f]">
+        <Icon name="chevron" size={17} />
+      </span>
+    </Link>
   );
 }
 
@@ -331,11 +401,12 @@ export default function PatientDashboard() {
 
   const [patient, setPatient] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
-    const loadUser = async () => {
+    async function loadUser() {
       try {
         const response = await fetch("/api/auth/me", {
           method: "GET",
@@ -373,7 +444,7 @@ export default function PatientDashboard() {
         console.error("Unable to load current user:", error);
         router.replace("/login");
       }
-    };
+    }
 
     loadUser();
 
@@ -385,6 +456,16 @@ export default function PatientDashboard() {
   const firstName = patient?.name
     ? patient.name.trim().split(/\s+/)[0]
     : "Patient";
+
+  const initials = patient?.name
+    ? patient.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part.charAt(0))
+        .join("")
+        .toUpperCase()
+    : "P";
 
   const handleLogout = async () => {
     try {
@@ -400,673 +481,543 @@ export default function PatientDashboard() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#02070b] text-white">
-        <BackgroundSystem />
+      <main className="flex min-h-screen items-center justify-center bg-[#f4f5f2]">
+        <div className="rounded-2xl border border-[#e2e6e1] bg-white px-10 py-8 text-center shadow-[0_10px_30px_rgba(35,54,45,0.05)]">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[#d7e4dc] border-t-[#39705b]" />
 
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="flex flex-col items-center">
-            <AIOrb />
-
-            <div className="mt-10 text-[8px] tracking-[0.28em] text-cyan-300/60">
-              INITIALIZING PATIENT CORE
-            </div>
-
-            <div className="mt-3 h-px w-44 overflow-hidden bg-white/[0.05]">
-              <div className="h-full w-1/2 animate-loadingBar bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
-            </div>
-          </div>
+          <p className="mt-4 text-[13px] font-medium text-[#647169]">
+            Preparing your health workspace...
+          </p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#02070b] text-white">
-      <BackgroundSystem />
+    <main className="min-h-screen bg-[#f4f5f2] text-[#26362e]">
+      <div className="flex min-h-screen">
 
-      {/* Ambient top gradient */}
-      <div className="pointer-events-none absolute left-1/2 top-0 h-72 w-[70vw] -translate-x-1/2 bg-cyan-300/[0.025] blur-[100px]" />
+        {/* SIDEBAR */}
 
-      <div className="relative mx-auto w-full max-w-[1100px] px-5 pb-10 pt-5 sm:px-7 lg:px-8">
-        {/* ========================================================= */}
-        {/* TOP NAVIGATION */}
-        {/* ========================================================= */}
+        <aside className="hidden w-[238px] shrink-0 bg-[#0d3027] lg:flex lg:flex-col">
 
-        <header className="mb-4 flex items-center justify-between border-b border-white/[0.055] pb-4">
-          <Link href="/dashboard" className="group">
-            <div className="text-[11px] font-semibold tracking-[0.16em] text-white transition-colors group-hover:text-cyan-100">
-              HOMEHEALTH <span className="text-cyan-300">360</span>
-            </div>
+          <div className="px-5 pt-4">
+            <Link href="/dashboard" className="block">
 
-            <div className="mt-0.5 text-[6px] tracking-[0.28em] text-slate-600">
-              AI HEALTHCARE OPERATING SYSTEM
-            </div>
-          </Link>
+              <div className="flex items-start gap-3">
 
-          <div className="flex items-center gap-2.5">
-            <div className="hidden rounded-full border border-emerald-300/10 bg-emerald-300/[0.025] px-2.5 py-1.5 sm:block">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inset-0 animate-ping rounded-full bg-emerald-300/40" />
-                  <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-300/70" />
-                </span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-[9px] bg-white text-[#579079]">
+                  <span className="text-[17px]">â™¡</span>
+                </div>
 
-                <span className="text-[6px] font-medium tracking-[0.18em] text-emerald-300/60">
-                  SYSTEM ONLINE
-                </span>
+                <div>
+                  <div className="text-[16px] font-bold tracking-[-0.035em] text-white">
+                    HOMEHEALTH
+                  </div>
+
+                  <div className="mt-0.5 text-[9px] font-bold tracking-[0.18em] text-[#b4cbbf]">
+                    360
+                  </div>
+                </div>
+
               </div>
+
+              <div className="mt-2 text-[7px] font-medium uppercase tracking-[0.14em] text-[#8fa99d]">
+                Private health intelligence
+              </div>
+
+            </Link>
+          </div>
+
+          <div className="mt-7 px-3">
+            <nav className="space-y-1">
+
+              {navItems.map((item) => (
+                <SidebarItem
+                  key={item.label}
+                  href={item.href}
+                  label={item.label}
+                  icon={item.icon}
+                  active={item.label === "Dashboard"}
+                />
+              ))}
+
+            </nav>
+          </div>
+
+          <div className="mt-auto px-3 pb-4">
+
+            <div className="rounded-xl border border-white/[0.08] bg-white/[0.055] p-3.5">
+
+              <div className="flex items-center gap-2 text-[10px] font-semibold text-[#e1ebe5]">
+                <Icon name="privacy" size={17} />
+                Your health data is encrypted
+              </div>
+
+              <p className="mt-1.5 text-[9px] leading-4 text-[#a9beb5]">
+                Shared only with your permission.
+              </p>
+
             </div>
 
             <button
               onClick={handleLogout}
-              className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-1.5 text-[7px] tracking-[0.1em] text-slate-400 transition-all duration-300 hover:border-red-300/20 hover:bg-red-300/[0.025] hover:text-red-200"
+              className="mt-2 flex min-h-9 w-full items-center gap-2 rounded-lg px-2 text-[11px] font-medium text-[#b9cbc3] hover:bg-white/[0.06] hover:text-white"
             >
-              LOGOUT
+              <Icon name="logout" size={17} />
+              Sign out
             </button>
+
           </div>
-        </header>
+        </aside>
 
-        {/* ========================================================= */}
-        {/* WELCOME AREA */}
-        {/* ========================================================= */}
+        {/* MOBILE DRAWER */}
 
-        <section className="mb-5 grid gap-4 lg:grid-cols-[1fr_180px]">
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.055] bg-gradient-to-br from-white/[0.025] via-white/[0.015] to-cyan-300/[0.015] p-5 sm:p-6">
-            {/* panel glow */}
-            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-300/[0.035] blur-3xl" />
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
 
-            <div className="relative">
-              <div className="text-[6px] font-semibold tracking-[0.25em] text-cyan-300/70">
-                PATIENT COMMAND INTERFACE
-              </div>
+            <button
+              aria-label="Close navigation"
+              className="absolute inset-0 bg-[#12342b]/35 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Hello,{" "}
-                <span className="text-cyan-200">{firstName}</span>.
-              </h1>
+            <aside className="relative h-full w-[270px] bg-[#0d3027] px-4 py-5 text-white shadow-[14px_0_30px_rgba(12,48,39,0.16)]">
 
-              <p className="mt-2 max-w-xl text-[8px] leading-5 text-slate-500 sm:text-[9px]">
-                Your connected healthcare environment is ready. Start with AI
-                guidance, doctor consultation, diagnostics, caregiver
-                support, or your health records.
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Link
-                  href="/ai-care"
-                  className="rounded-lg border border-cyan-300/20 bg-cyan-300/[0.06] px-3 py-2 text-[7px] font-semibold tracking-[0.08em] text-cyan-100 transition-all duration-300 hover:bg-cyan-300/[0.10] hover:shadow-[0_0_20px_rgba(34,211,238,0.08)]"
-                >
-                  OPEN AI CARE
-                </Link>
+              <div className="flex items-start justify-between">
 
                 <Link
-                  href="/doctor-consult"
-                  className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[7px] font-semibold tracking-[0.08em] text-slate-300 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04]"
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
                 >
-                  FIND A DOCTOR
+                  <div className="text-[17px] font-bold">
+                    HOMEHEALTH
+                  </div>
+
+                  <div className="text-[9px] font-bold tracking-[0.18em] text-[#b4cbbf]">
+                    360
+                  </div>
                 </Link>
-              </div>
-            </div>
-          </div>
 
-          <div className="hidden items-center justify-center rounded-2xl border border-white/[0.055] bg-white/[0.015] lg:flex">
-            <AIOrb />
-          </div>
-        </section>
+                <button
+                  aria-label="Close menu"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg text-[#c5d5cd] hover:bg-white/[0.08]"
+                >
+                  <Icon name="close" size={21} />
+                </button>
 
-        {/* ========================================================= */}
-        {/* QUICK NAV */}
-        {/* ========================================================= */}
-
-        <section className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
-          {[
-            {
-              label: "AI Care",
-              href: "/ai-care",
-              icon: "✦",
-            },
-            {
-              label: "Doctors",
-              href: "/doctor-consult",
-              icon: "◎",
-            },
-            {
-              label: "Lab Tests",
-              href: "/lab-tests",
-              icon: "⌁",
-            },
-            {
-              label: "Caregiver",
-              href: "/caregiver-booking",
-              icon: "+",
-            },
-            {
-              label: "Health Records",
-              href: "/health-records",
-              icon: "▣",
-            },
-          ].map((item, index) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="group rounded-xl border border-white/[0.055] bg-white/[0.018] p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]"
-              style={{
-                animation: `dashboardCardIn 0.65s ease ${index * 0.08}s both`,
-              }}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-300/10 bg-cyan-300/[0.035] text-[10px] text-cyan-300 transition-all duration-300 group-hover:border-cyan-300/20 group-hover:bg-cyan-300/[0.07]">
-                  {item.icon}
-                </div>
-
-                <span className="text-[8px] text-slate-700 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-cyan-300/60">
-                  ↗
-                </span>
               </div>
 
-              <div className="mt-3 text-[8px] font-medium text-slate-300 group-hover:text-cyan-100">
-                {item.label}
-              </div>
+              <nav className="mt-8 space-y-1">
 
-              <div className="mt-1 text-[5.5px] tracking-[0.14em] text-slate-700">
-                OPEN MODULE
-              </div>
-            </Link>
-          ))}
-        </section>
-
-        {/* ========================================================= */}
-        {/* COMMAND CENTER + CARE NETWORK */}
-        {/* ========================================================= */}
-
-        <section className="mb-5 grid gap-4 lg:grid-cols-[1.45fr_0.82fr]">
-          {/* LEFT */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.055] bg-white/[0.014] p-4 sm:p-5">
-            <div className="pointer-events-none absolute -left-20 top-0 h-48 w-48 rounded-full bg-cyan-300/[0.025] blur-3xl" />
-
-            <div className="relative">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-[6px] font-semibold tracking-[0.25em] text-cyan-300/65">
-                    AI INTELLIGENCE
-                  </div>
-
-                  <h2 className="mt-1.5 text-sm font-semibold text-white sm:text-base">
-                    Care Command Center
-                  </h2>
-
-                  <p className="mt-1.5 max-w-xl text-[7px] leading-4 text-slate-500">
-                    Start from your healthcare need and HOMEHEALTH 360 can
-                    guide you toward the appropriate platform service.
-                  </p>
-                </div>
-
-                <div className="rounded-full border border-emerald-300/10 bg-emerald-300/[0.025] px-2 py-1 text-[5px] font-semibold tracking-[0.16em] text-emerald-300/70">
-                  AI READY
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                {quickActions.map((action) => (
-                  <QuickActionCard key={action.title} {...action} />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT CARE NETWORK */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.055] bg-white/[0.014] p-4 sm:p-5">
-            <div className="pointer-events-none absolute right-0 top-0 h-44 w-44 rounded-full bg-cyan-300/[0.025] blur-3xl" />
-
-            <div className="relative">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-[6px] font-semibold tracking-[0.25em] text-cyan-300/65">
-                    LIVE SYSTEM
-                  </div>
-
-                  <h2 className="mt-1.5 text-sm font-semibold text-white sm:text-base">
-                    Care Network
-                  </h2>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-emerald-300 shadow-[0_0_7px_rgba(110,231,183,0.45)] animate-statusPulse" />
-
-                  <span className="text-[5px] font-semibold tracking-[0.14em] text-emerald-300/70">
-                    CONNECTED
-                  </span>
-                </div>
-              </div>
-
-              {/* Animated network line */}
-              <div className="pointer-events-none absolute left-[20px] top-[84px] h-[calc(100%-108px)] w-px overflow-hidden bg-white/[0.04]">
-                <div className="absolute left-0 top-0 h-10 w-px bg-gradient-to-b from-transparent via-cyan-300/60 to-transparent animate-networkBeam" />
-              </div>
-
-              <div className="mt-5 space-y-2 pl-0.5">
-                {careNetwork.map((item, index) => (
-                  <CareNetworkCard
-                    key={item.title}
-                    item={item}
-                    index={index}
+                {navItems.map((item) => (
+                  <SidebarItem
+                    key={item.label}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    active={item.label === "Dashboard"}
+                    onClick={() => setMobileOpen(false)}
                   />
                 ))}
+
+              </nav>
+
+            </aside>
+          </div>
+        )}
+
+        {/* MAIN */}
+
+        <div className="min-w-0 flex-1">
+
+          <div className="mx-auto max-w-[1260px] px-4 pb-8 sm:px-6 lg:px-7">
+
+            {/* TOP BAR */}
+
+            <header className="flex h-[58px] items-center justify-between border-b border-[#e3e6e2]">
+
+              <div className="flex items-center gap-2 lg:hidden">
+
+                <button
+                  aria-label="Open navigation"
+                  onClick={() => setMobileOpen(true)}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#dfe4df] bg-white text-[#63716a]"
+                >
+                  <Icon name="menu" size={20} />
+                </button>
+
+                <span className="text-[13px] font-semibold text-[#3a4a42]">
+                  HOMEHEALTH 360
+                </span>
+
               </div>
 
-              <div className="mt-3 rounded-xl border border-cyan-300/[0.08] bg-cyan-300/[0.02] px-3 py-2.5">
-                <div className="text-[5px] font-semibold tracking-[0.18em] text-cyan-300/60">
-                  AI SYSTEM MESSAGE
+              <div className="hidden text-[10px] font-medium text-[#919a95] lg:block">
+                Personal health workspace
+              </div>
+
+              <div className="ml-auto flex items-center gap-3">
+
+                <div className="hidden h-9 items-center gap-2 rounded-lg border border-[#e2e6e2] bg-white px-3 text-[10px] text-[#7f8b84] sm:flex">
+
+                  <Icon name="search" size={15} />
+
+                  <span>
+                    Search reports, medications, events...
+                  </span>
+
+                  <span className="ml-2 text-[8px] text-[#a0a8a3]">
+                    âŒ˜K
+                  </span>
+
                 </div>
 
-                <div className="mt-1 text-[6px] leading-4 text-slate-600">
-                  Your connected healthcare modules are ready for your next
-                  action.
+                <span className="hidden rounded-full bg-[#e7f2eb] px-3 py-1.5 text-[8px] font-semibold text-[#477360] sm:block">
+                  â— All data synced
+                </span>
+
+                <span className="text-[17px]">
+                  ðŸ””  
+                </span>
+
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#dce9df] text-[9px] font-bold text-[#315e4d]">
+                  {initials}
                 </div>
+
+                <div className="hidden leading-[1.1] sm:block">
+
+                  <div className="max-w-[100px] truncate text-[10px] font-semibold text-[#314038]">
+                    {patient?.name || "Patient"}
+                  </div>
+
+                  <div className="mt-0.5 text-[8px] text-[#8d9791]">
+                    Premium plan
+                  </div>
+
+                </div>
+
               </div>
+            </header>
+
+            {/* GREETING */}
+
+            <section className="pt-5">
+
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#929b96]">
+                Monday, October 5
+              </div>
+
+              <div className="mt-1.5 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
+                <div>
+
+                  <h1 className="text-[30px] font-semibold tracking-[-0.045em] text-[#24332b] sm:text-[32px]">
+                    Good morning, {firstName}
+                  </h1>
+
+                  <p className="mt-1.5 text-[11px] text-[#7f8983]">
+                    Here&apos;s what deserves your attention across your health
+                    record today.
+                  </p>
+
+                </div>
+
+                <div className="flex gap-2">
+
+                  <Link
+                    href="/ai-care"
+                    className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#dfe5e0] bg-white px-4 text-[10px] font-semibold text-[#496b5a] shadow-[0_1px_3px_rgba(30,48,40,0.03)] hover:bg-[#f8faf8]"
+                  >
+                    <Icon name="ai" size={16} />
+                    Ask Care Copilot
+                  </Link>
+
+                  <Link
+                    href="/health-records"
+                    className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#147862] px-4 text-[10px] font-semibold text-white shadow-[0_3px_10px_rgba(36,96,76,0.14)] hover:bg-[#116951]"
+                  >
+                    <Icon name="upload" size={16} />
+                    Upload report
+                  </Link>
+
+                </div>
+
+              </div>
+            </section>
+
+            {/* SNAPSHOT */}
+
+            <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+              <SnapshotCard
+                title="Health snapshot"
+                value="82 / 100"
+                subtitle="Stable Â· 3 signals improved this month"
+                highlighted
+              />
+
+              <SnapshotCard
+                title="Care gaps"
+                value="2 priority"
+                subtitle="One preventive screening is due"
+              />
+
+              <SnapshotCard
+                title="Upcoming"
+                value="4 items"
+                subtitle="Next: Annual physical on Oct 12"
+              />
+
+              <SnapshotCard
+                title="Records"
+                value="18 reports"
+                subtitle="Latest lab report processed today"
+              />
+
+            </section>
+
+            {/* MAIN CONTENT */}
+
+            <section className="mt-4 grid gap-4 lg:grid-cols-[1.55fr_0.85fr]">
+
+              {/* HEALTH SNAPSHOT */}
+
+              <div className="space-y-4">
+
+                <section className="rounded-[17px] border border-[#e3e7e3] bg-white p-5">
+
+                  <div className="flex items-start justify-between gap-2">
+
+                    <div>
+
+                      <div className="text-[15px] font-semibold text-[#2e4037]">
+                        Your health snapshot
+                      </div>
+
+                      <div className="mt-1 text-[11px] text-[#8b948f]">
+                        A simple view of recent signalsâ€”not a diagnosis.
+                      </div>
+
+                    </div>
+
+                    <span className="rounded-full bg-[#e9f4ed] px-3 py-1.5 text-[8px] font-semibold text-[#5c806b]">
+                      â— Updated today
+                    </span>
+
+                  </div>
+
+                  <div className="mt-4 rounded-xl bg-[#f7faf7] px-4 py-4">
+
+                    <div className="flex items-center gap-5">
+
+                      <div className="relative flex h-[114px] w-[114px] shrink-0 items-center justify-center rounded-full border-[12px] border-[#d9ebe0] bg-white">
+
+                        <div className="absolute inset-[-12px] rounded-full border-[12px] border-transparent border-l-[#19745a] border-t-[#19745a] border-r-[#19745a]" />
+
+                        <div className="text-center">
+
+                          <div className="text-[28px] font-semibold leading-none text-[#355f4e]">
+                            82
+                          </div>
+
+                          <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#789086]">
+                            Stable
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <div className="min-w-0 flex-1 space-y-4">
+
+                        <div>
+
+                          <div className="mb-1.5 flex items-center justify-between text-[11px]">
+
+                            <span className="font-medium text-[#63716a]">
+                              Blood pressure{" "}
+                              <strong className="text-[#384b41]">
+                                118 / 76
+                              </strong>
+                            </span>
+
+                            <span className="text-[#819087]">
+                              Within your usual range
+                            </span>
+
+                          </div>
+
+                          <div className="h-[6px] overflow-hidden rounded-full bg-[#e5ebe6]">
+                            <div className="h-full w-[68%] rounded-full bg-[#176d57]" />
+                          </div>
+
+                        </div>
+
+                        <div>
+
+                          <div className="mb-1.5 flex items-center justify-between text-[11px]">
+
+                            <span className="font-medium text-[#63716a]">
+                              LDL cholesterol{" "}
+                              <strong className="text-[#384b41]">
+                                104 mg/dL
+                              </strong>
+                            </span>
+
+                            <span className="text-[#819087]">
+                              Improved from 119 in April
+                            </span>
+
+                          </div>
+
+                          <div className="h-[6px] overflow-hidden rounded-full bg-[#e5ebe6]">
+                            <div className="h-full w-[55%] rounded-full bg-[#4b86af]" />
+                          </div>
+
+                        </div>
+
+                        <div>
+
+                          <div className="mb-1.5 flex items-center justify-between text-[11px]">
+
+                            <span className="font-medium text-[#63716a]">
+                              A1C{" "}
+                              <strong className="text-[#384b41]">
+                                5.6%
+                              </strong>
+                            </span>
+
+                            <span className="text-[#819087]">
+                              Monitor at next routine labs
+                            </span>
+
+                          </div>
+
+                          <div className="h-[6px] overflow-hidden rounded-full bg-[#e5ebe6]">
+                            <div className="h-full w-[42%] rounded-full bg-[#c67e2a]" />
+                          </div>
+
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                </section>
+
+                {/* LATEST REPORTS */}
+
+                <section className="rounded-[17px] border border-[#e3e7e3] bg-white p-5">
+
+                  <div className="flex items-center justify-between">
+
+                    <div>
+
+                      <div className="text-[15px] font-semibold text-[#2e4037]">
+                        Latest reports
+                      </div>
+
+                      <div className="mt-1 text-[11px] text-[#8b948f]">
+                        AI-assisted plain-language summaries of your uploaded
+                        records.
+                      </div>
+
+                    </div>
+
+                    <Link
+                      href="/health-records"
+                      className="text-[11px] font-semibold text-[#50715f] hover:text-[#2d5f4b]"
+                    >
+                      View all reports
+                    </Link>
+
+                  </div>
+
+                  <div className="mt-4 flex items-center gap-3 border-t border-[#edf0ec] pt-4">
+
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#eef4f1] text-[#5f7d6d]">
+                      <Icon name="file" size={19} />
+                    </span>
+
+                    <div className="min-w-0 flex-1">
+
+                      <div className="truncate text-[12px] font-semibold text-[#3f4e46]">
+                        Comprehensive metabolic panel
+                      </div>
+
+                      <div className="mt-1 text-[9px] text-[#8b948f]">
+                        Mercy Health Â· Oct 5, 2026
+                      </div>
+
+                    </div>
+
+                    <span className="rounded-full bg-[#e9f4ed] px-3 py-1.5 text-[8px] font-semibold text-[#5b806a]">
+                      Ready to review
+                    </span>
+
+                  </div>
+
+                </section>
+
+              </div>
+
+              {/* NEXT BEST ACTIONS */}
+
+              <section className="rounded-[17px] border border-[#e3e7e3] bg-white p-5">
+
+                <div>
+
+                  <div className="text-[15px] font-semibold text-[#2e4037]">
+                    Next best actions
+                  </div>
+
+                  <div className="mt-1 text-[11px] text-[#8b948f]">
+                    Prioritized from your record and preferences.
+                  </div>
+
+                </div>
+
+                <div className="mt-3">
+
+                  {nextActions.map((action) => (
+                    <NextActionCard
+                      key={action.title}
+                      {...action}
+                    />
+                  ))}
+
+                </div>
+
+                <Link
+                  href="/care-gaps"
+                  className="mt-3 flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#dfe6e1] bg-[#fbfcfa] text-[10px] font-semibold text-[#486b58] hover:bg-[#f3f7f3]"
+                >
+                  â†’ Review care plan
+                </Link>
+
+              </section>
+
+            </section>
+
+            {/* FOOTER */}
+
+            <div className="mt-5 flex items-center justify-between border-t border-[#e4e7e2] pt-3 text-[8px] text-[#9aa29d]">
+
+              <span>
+                HOMEHEALTH 360 Â· Your health story, clearly connected.
+              </span>
+
+              <span className="hidden sm:block">
+                Health information is not a diagnosis.
+              </span>
+
             </div>
+
           </div>
-        </section>
-
-        {/* ========================================================= */}
-        {/* CONNECTED CARE JOURNEY */}
-        {/* ========================================================= */}
-
-        <section className="mb-5 rounded-2xl border border-white/[0.055] bg-white/[0.014] p-4 sm:p-5">
-          <div className="text-[6px] font-semibold tracking-[0.25em] text-cyan-300/65">
-            CONNECTED CARE JOURNEY
-          </div>
-
-          <h2 className="mt-1.5 text-sm font-semibold text-white sm:text-base">
-            Your healthcare, one continuous flow.
-          </h2>
-
-          <p className="mt-1.5 max-w-2xl text-[7px] leading-4 text-slate-500">
-            HOMEHEALTH 360 is designed to connect different parts of your
-            healthcare journey through one digital platform.
-          </p>
-
-          <div className="relative mt-5">
-            {/* Journey connector */}
-            <div className="pointer-events-none absolute left-[8%] right-[8%] top-[23px] hidden h-px bg-gradient-to-r from-transparent via-cyan-300/15 to-transparent md:block" />
-
-            <div className="relative grid gap-2 sm:grid-cols-2 md:grid-cols-5">
-              {journeyItems.map((item, index) => (
-                <JourneyCard key={item.number} {...item} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================= */}
-        {/* PATIENT PROFILE */}
-        {/* ========================================================= */}
-
-        <section className="mb-4 rounded-2xl border border-white/[0.055] bg-white/[0.014] p-4 sm:p-5">
-          <div className="text-[6px] font-semibold tracking-[0.25em] text-cyan-300/65">
-            IDENTITY
-          </div>
-
-          <h2 className="mt-1.5 text-sm font-semibold text-white sm:text-base">
-            Patient Profile
-          </h2>
-
-          <div className="mt-5 grid gap-2 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/[0.055] bg-white/[0.018] p-3">
-              <div className="text-[5px] font-semibold tracking-[0.18em] text-slate-600">
-                NAME
-              </div>
-
-              <div className="mt-2 truncate text-[9px] text-slate-200">
-                {patient?.name || "Not provided"}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-white/[0.055] bg-white/[0.018] p-3">
-              <div className="text-[5px] font-semibold tracking-[0.18em] text-slate-600">
-                EMAIL
-              </div>
-
-              <div className="mt-2 truncate text-[9px] text-slate-200">
-                {patient?.email || "Not provided"}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-white/[0.055] bg-white/[0.018] p-3">
-              <div className="text-[5px] font-semibold tracking-[0.18em] text-slate-600">
-                PHONE
-              </div>
-
-              <div className="mt-2 truncate text-[9px] text-slate-200">
-                {patient?.phone || "Not provided"}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================= */}
-        {/* DISCLAIMER */}
-        {/* ========================================================= */}
-
-        <div className="rounded-xl border border-amber-300/[0.08] bg-amber-300/[0.015] px-3 py-2.5">
-          <p className="text-[6px] leading-4 text-amber-200/45">
-            HOMEHEALTH 360 is currently a software prototype. Do not use this
-            prototype for real medical emergencies or as a replacement for
-            professional medical advice.
-          </p>
         </div>
-
-        {/* ========================================================= */}
-        {/* FOOTER */}
-        {/* ========================================================= */}
-
-        <footer className="mt-5 flex flex-col gap-3 border-t border-white/[0.05] pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-[7px] font-semibold tracking-[0.14em] text-white/70">
-              HOMEHEALTH <span className="text-cyan-300">360</span>
-            </div>
-
-            <div className="mt-1 text-[5.5px] text-slate-700">
-              AI Healthcare Operating System
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-[5.5px] text-slate-700">
-            <Link
-              href="/ai-care"
-              className="transition-colors hover:text-cyan-300"
-            >
-              AI Care
-            </Link>
-
-            <Link
-              href="/doctor-consult"
-              className="transition-colors hover:text-cyan-300"
-            >
-              Doctors
-            </Link>
-
-            <Link
-              href="/lab-tests"
-              className="transition-colors hover:text-cyan-300"
-            >
-              Labs
-            </Link>
-
-            <Link
-              href="/health-records"
-              className="transition-colors hover:text-cyan-300"
-            >
-              Records
-            </Link>
-          </div>
-        </footer>
       </div>
-
-      <style jsx global>{`
-        /* ==========================================================
-           GLOBAL DASHBOARD ANIMATIONS
-           ========================================================== */
-
-        @keyframes dashParticle {
-          0% {
-            opacity: 0;
-            transform: translate3d(0, 10px, 0) scale(0.8);
-          }
-
-          20% {
-            opacity: 0.5;
-          }
-
-          50% {
-            opacity: 0.85;
-            transform: translate3d(0, -14px, 0) scale(1);
-          }
-
-          80% {
-            opacity: 0.35;
-          }
-
-          100% {
-            opacity: 0;
-            transform: translate3d(0, 12px, 0) scale(0.8);
-          }
-        }
-
-        @keyframes dashOrbOne {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) scale(1);
-          }
-
-          50% {
-            transform: translate3d(18px, 15px, 0) scale(1.08);
-          }
-        }
-
-        @keyframes dashOrbTwo {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) scale(1);
-          }
-
-          50% {
-            transform: translate3d(-24px, -18px, 0) scale(1.05);
-          }
-        }
-
-        @keyframes aiRingOne {
-          0% {
-            transform: rotate(0deg) scale(1);
-          }
-
-          50% {
-            transform: rotate(180deg) scale(1.035);
-          }
-
-          100% {
-            transform: rotate(360deg) scale(1);
-          }
-        }
-
-        @keyframes aiRingTwo {
-          0% {
-            transform: rotate(360deg) scale(1);
-          }
-
-          50% {
-            transform: rotate(180deg) scale(1.025);
-          }
-
-          100% {
-            transform: rotate(0deg) scale(1);
-          }
-        }
-
-        @keyframes aiRingThree {
-          0% {
-            transform: rotate(0deg);
-          }
-
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes aiCoreGlow {
-          0%,
-          100% {
-            opacity: 0.35;
-            transform: scale(0.9);
-          }
-
-          50% {
-            opacity: 0.75;
-            transform: scale(1.15);
-          }
-        }
-
-        @keyframes statusPulse {
-          0%,
-          100% {
-            opacity: 0.35;
-            transform: scale(0.85);
-          }
-
-          50% {
-            opacity: 1;
-            transform: scale(1.35);
-          }
-        }
-
-        @keyframes networkBeam {
-          0% {
-            transform: translateY(-40px);
-            opacity: 0;
-          }
-
-          15% {
-            opacity: 1;
-          }
-
-          75% {
-            opacity: 0.75;
-          }
-
-          100% {
-            transform: translateY(260px);
-            opacity: 0;
-          }
-        }
-
-        @keyframes careScan {
-          0% {
-            transform: translateX(0);
-            opacity: 0;
-          }
-
-          15% {
-            opacity: 0.8;
-          }
-
-          45% {
-            opacity: 1;
-          }
-
-          70% {
-            opacity: 0.2;
-          }
-
-          100% {
-            transform: translateX(430px);
-            opacity: 0;
-          }
-        }
-
-        @keyframes careNetworkEntry {
-          0% {
-            opacity: 0;
-            transform: translate3d(-14px, 6px, 0);
-            filter: blur(3px);
-          }
-
-          55% {
-            opacity: 1;
-            transform: translate3d(3px, 0, 0);
-            filter: blur(0);
-          }
-
-          100% {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-            filter: blur(0);
-          }
-        }
-
-        @keyframes dashboardCardIn {
-          0% {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes loadingBar {
-          0% {
-            transform: translateX(-100%);
-          }
-
-          100% {
-            transform: translateX(260%);
-          }
-        }
-
-        .animate-dashParticle {
-          animation-name: dashParticle;
-          animation-timing-function: ease-in-out;
-          animation-iteration-count: infinite;
-        }
-
-        .animate-dashOrbOne {
-          animation: dashOrbOne 9s ease-in-out infinite;
-        }
-
-        .animate-dashOrbTwo {
-          animation: dashOrbTwo 11s ease-in-out infinite;
-        }
-
-        .animate-aiRingOne {
-          animation: aiRingOne 12s linear infinite;
-        }
-
-        .animate-aiRingTwo {
-          animation: aiRingTwo 16s linear infinite;
-        }
-
-        .animate-aiRingThree {
-          animation: aiRingThree 10s linear infinite;
-        }
-
-        .animate-aiCoreGlow {
-          animation: aiCoreGlow 3.5s ease-in-out infinite;
-        }
-
-        .animate-statusPulse {
-          animation: statusPulse 2.2s ease-in-out infinite;
-        }
-
-        .animate-networkBeam {
-          animation: networkBeam 4.2s linear infinite;
-        }
-
-        .animate-careScan {
-          animation: careScan 4.8s linear infinite;
-        }
-
-        .animate-loadingBar {
-          animation: loadingBar 1.9s ease-in-out infinite;
-        }
-
-        .care-network-entry {
-          animation: careNetworkEntry 0.8s cubic-bezier(0.22, 1, 0.36, 1)
-            var(--care-delay) both;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.001ms !important;
-            animation-iteration-count: 1 !important;
-            scroll-behavior: auto !important;
-            transition-duration: 0.001ms !important;
-          }
-        }
-      `}</style>
     </main>
   );
 }

@@ -1,1050 +1,1503 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
-type LabTest = {
-  id: string;
+type IconName =
+  | "grid"
+  | "upload"
+  | "timeline"
+  | "gaps"
+  | "reminders"
+  | "ai"
+  | "family"
+  | "privacy"
+  | "search"
+  | "bell"
+  | "lab"
+  | "clock"
+  | "shield"
+  | "home"
+  | "check"
+  | "arrow"
+  | "calendar"
+  | "user"
+  | "report"
+  | "close";
+
+function Icon({
+  name,
+  size = 18,
+}: {
+  name: IconName;
+  size?: number;
+}) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+
+  switch (name) {
+    case "grid":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+      );
+
+    case "upload":
+      return (
+        <svg {...common}>
+          <path d="M12 16V4" />
+          <path d="m7 9 5-5 5 5" />
+          <path d="M5 20h14" />
+        </svg>
+      );
+
+    case "timeline":
+      return (
+        <svg {...common}>
+          <path d="M6 4v16" />
+          <circle cx="6" cy="6" r="2" />
+          <circle cx="6" cy="12" r="2" />
+          <circle cx="6" cy="18" r="2" />
+          <path d="M10 6h8" />
+          <path d="M10 12h6" />
+          <path d="M10 18h8" />
+        </svg>
+      );
+
+    case "gaps":
+      return (
+        <svg {...common}>
+          <path d="M5 19V9" />
+          <path d="M12 19V5" />
+          <path d="M19 19v-7" />
+          <path d="M3 19h18" />
+        </svg>
+      );
+
+    case "reminders":
+      return (
+        <svg {...common}>
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+          <path d="M10 21h4" />
+        </svg>
+      );
+
+    case "ai":
+      return (
+        <svg {...common}>
+          <rect x="5" y="5" width="14" height="14" rx="3" />
+          <path d="M9 9h6v6H9z" />
+          <path d="M9 2v3M15 2v3M9 19v3M15 19v3" />
+          <path d="M2 9h3M2 15h3M19 9h3M19 15h3" />
+        </svg>
+      );
+
+    case "family":
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3" />
+          <circle cx="17" cy="9" r="2.5" />
+          <path d="M3 20c0-3.2 2.6-5 6-5s6 1.8 6 5" />
+          <path d="M15 15c3 0 5 1.6 5 5" />
+        </svg>
+      );
+
+    case "privacy":
+      return (
+        <svg {...common}>
+          <rect x="5" y="10" width="14" height="10" rx="2" />
+          <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+        </svg>
+      );
+
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-4-4" />
+        </svg>
+      );
+
+    case "bell":
+      return (
+        <svg {...common}>
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+          <path d="M10 21h4" />
+        </svg>
+      );
+
+    case "lab":
+      return (
+        <svg {...common}>
+          <path d="M9 3v6l-5 9a2 2 0 0 0 1.8 3h12.4A2 2 0 0 0 20 18l-5-9V3" />
+          <path d="M8 3h8" />
+          <path d="M7 15h10" />
+        </svg>
+      );
+
+    case "clock":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        </svg>
+      );
+
+    case "shield":
+      return (
+        <svg {...common}>
+          <path d="M12 3 20 6v5c0 5.2-3.4 8.5-8 10-4.6-1.5-8-4.8-8-10V6z" />
+          <path d="m8.5 12 2.2 2.2 4.8-5" />
+        </svg>
+      );
+
+    case "home":
+      return (
+        <svg {...common}>
+          <path d="m3 11 9-8 9 8" />
+          <path d="M5 10v10h14V10" />
+          <path d="M9 20v-6h6v6" />
+        </svg>
+      );
+
+    case "check":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 2.5 2.5L16 9" />
+        </svg>
+      );
+
+    case "arrow":
+      return (
+        <svg {...common}>
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      );
+
+    case "calendar":
+      return (
+        <svg {...common}>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M16 3v4M8 3v4M3 10h18" />
+        </svg>
+      );
+
+    case "user":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="7" r="3.5" />
+          <path d="M5 21a7 7 0 0 1 14 0" />
+        </svg>
+      );
+
+    case "report":
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l3 3v15H6z" />
+          <path d="M15 3v4h4" />
+          <path d="M9 12h6M9 16h6" />
+        </svg>
+      );
+
+    case "close":
+      return (
+        <svg {...common}>
+          <path d="m6 6 12 12M18 6 6 18" />
+        </svg>
+      );
+
+    default:
+      return null;
+  }
+}
+
+function SidebarItem({
+  href,
+  label,
+  icon,
+  active = false,
+}: {
+  href: string;
+  label: string;
+  icon: IconName;
+  active?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={[
+        "flex min-h-[42px] items-center gap-3 rounded-[10px] px-3 text-[13px] font-medium transition-all duration-200",
+        active
+          ? "bg-[#ffffff18] text-white"
+          : "text-[#c9d8d1] hover:bg-[#ffffff0d] hover:text-white",
+      ].join(" ")}
+    >
+      <span className="flex w-6 shrink-0 items-center justify-center">
+        <Icon name={icon} size={19} />
+      </span>
+
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+type LabPackage = {
   name: string;
   description: string;
-  price: number;
+  price: string;
+  popular?: boolean;
 };
 
-type LabBooking = {
-  id: string;
-  patientName: string;
-  mobile: string;
-  address: string;
-  testNames: string;
-  date: string;
-  time: string;
-  status: string;
-  createdAt: string;
-};
+const labPackages: LabPackage[] = [
+  {
+    name: "Basic Health Check",
+    description:
+      "CBC, blood sugar, lipid profile, liver & kidney function",
+    price: "₹1,499",
+    popular: true,
+  },
+  {
+    name: "Complete Health Check",
+    description:
+      "Basic tests plus thyroid, vitamin D, B12 and urine",
+    price: "₹2,999",
+  },
+  {
+    name: "Senior Health Package",
+    description:
+      "Heart, diabetes, kidney, liver and vitamin profile",
+    price: "₹2,499",
+  },
+];
 
-const labTests: LabTest[] = [
+const individualTests = [
   {
-    id: "cbc",
-    name: "Complete Blood Count (CBC)",
-    description: "Basic blood health screening.",
-    price: 399,
+    name: "CBC",
+    description: "Blood count and general screening",
   },
   {
-    id: "sugar",
-    name: "Blood Sugar Test",
-    description: "Blood glucose screening.",
-    price: 199,
+    name: "Blood Sugar",
+    description: "FBS, PPBS and HbA1c",
   },
   {
-    id: "thyroid",
+    name: "Lipid Profile",
+    description: "Cholesterol and heart health",
+  },
+  {
+    name: "Liver Function",
+    description: "Liver health markers",
+  },
+  {
+    name: "Kidney Function",
+    description: "Kidney health markers",
+  },
+  {
     name: "Thyroid Profile",
-    description: "TSH, T3 and T4 screening.",
-    price: 499,
-  },
-  {
-    id: "vitamin-d",
-    name: "Vitamin D Test",
-    description: "Vitamin D level screening.",
-    price: 799,
-  },
-  {
-    id: "liver",
-    name: "Liver Function Test",
-    description: "Basic liver health screening.",
-    price: 599,
-  },
-  {
-    id: "kidney",
-    name: "Kidney Function Test",
-    description: "Basic kidney health screening.",
-    price: 499,
+    description: "Thyroid hormone assessment",
   },
 ];
 
-const timeSlots = [
-  "8:00 AM - 10:00 AM",
-  "10:00 AM - 12:00 PM",
-  "12:00 PM - 2:00 PM",
-  "2:00 PM - 4:00 PM",
-  "4:00 PM - 6:00 PM",
-];
+export default function LabTestsPage() {
+  const [activeTab, setActiveTab] = useState<
+    "series" | "rapid"
+  >("series");
 
-export default function LabTests() {
-  const [selectedTests, setSelectedTests] =
-    useState<string[]>([]);
-
-  const [patientName, setPatientName] =
-    useState("");
-
-  const [phone, setPhone] =
-    useState("");
-
-  const [address, setAddress] =
-    useState("");
-
-  const [date, setDate] =
-    useState("");
-
-  const [time, setTime] =
-    useState("");
-
-  const [bookings, setBookings] =
-    useState<LabBooking[]>([]);
-
-  const [loadingBookings, setLoadingBookings] =
-    useState(true);
-
-  const [bookingLoading, setBookingLoading] =
+  const [selectedService, setSelectedService] =
     useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [showOrderPanel, setShowOrderPanel] =
+    useState(false);
 
-  const [message, setMessage] =
-    useState("");
+  const [orderPlaced, setOrderPlaced] =
+    useState(false);
 
-  const [bookingId, setBookingId] =
-    useState("");
+  const [selectedPackage, setSelectedPackage] =
+    useState("Complete Blood Panel");
 
-  const today =
-    new Date().toLocaleDateString("en-CA");
-
-  // ==========================================
-  // SELECTED TESTS
-  // ==========================================
-
-  const selectedTestObjects =
-    labTests.filter((test) =>
-      selectedTests.includes(test.id)
-    );
-
-  const total =
-    selectedTestObjects.reduce(
-      (sum, test) =>
-        sum + test.price,
-      0
-    );
-
-  // ==========================================
-  // LOAD LAB BOOKINGS
-  // ==========================================
-
-  async function loadBookings() {
-    try {
-      setLoadingBookings(true);
-
-      const response =
-        await fetch(
-          "/api/lab-bookings",
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          }
-        );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            "Unable to load lab bookings."
-        );
-      }
-
-      setBookings(
-        data?.bookings || []
-      );
-    } catch (err: any) {
-      console.error(
-        "LOAD LAB BOOKINGS ERROR:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Lab bookings load nahi ho rahi."
-      );
-    } finally {
-      setLoadingBookings(false);
-    }
+  function openOrder(serviceName: string) {
+    setSelectedPackage(serviceName);
+    setShowOrderPanel(true);
+    setOrderPlaced(false);
   }
 
-  // ==========================================
-  // INITIAL LOAD
-  // ==========================================
-
-  useEffect(() => {
-    loadBookings();
-  }, []);
-
-  // ==========================================
-  // SELECT / UNSELECT TEST
-  // ==========================================
-
-  function toggleTest(id: string) {
-    setSelectedTests((current) => {
-      if (current.includes(id)) {
-        return current.filter(
-          (testId) =>
-            testId !== id
-        );
-      }
-
-      return [
-        ...current,
-        id,
-      ];
-    });
-
-    setError("");
-    setMessage("");
-  }
-
-  // ==========================================
-  // BOOK LAB TEST
-  // ==========================================
-
-  async function handleBooking() {
-    setError("");
-    setMessage("");
-    setBookingId("");
-
-    if (
-      selectedTests.length === 0
-    ) {
-      setError(
-        "Please select at least one lab test."
-      );
-      return;
-    }
-
-    if (!patientName.trim()) {
-      setError(
-        "Please enter patient name."
-      );
-      return;
-    }
-
-    if (!phone.trim()) {
-      setError(
-        "Please enter mobile number."
-      );
-      return;
-    }
-
-    if (
-      !/^[6-9]\d{9}$/.test(phone)
-    ) {
-      setError(
-        "Please enter a valid 10-digit Indian mobile number."
-      );
-      return;
-    }
-
-    if (!address.trim()) {
-      setError(
-        "Please enter home collection address."
-      );
-      return;
-    }
-
-    if (!date) {
-      setError(
-        "Please select collection date."
-      );
-      return;
-    }
-
-    if (date < today) {
-      setError(
-        "Please select today or a future date."
-      );
-      return;
-    }
-
-    if (!time) {
-      setError(
-        "Please select collection time."
-      );
-      return;
-    }
-
-    try {
-      setBookingLoading(true);
-
-      const testNames =
-        selectedTestObjects
-          .map(
-            (test) =>
-              test.name
-          )
-          .join(", ");
-
-      const response =
-        await fetch(
-          "/api/lab-bookings",
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            credentials:
-              "include",
-
-            body: JSON.stringify({
-              patientName:
-                patientName.trim(),
-
-              mobile: phone,
-
-              address:
-                address.trim(),
-
-              testNames,
-
-              date,
-
-              time,
-            }),
-          }
-        );
-
-      const data =
-        await response.json();
-
-      console.log(
-        "LAB BOOKING STATUS:",
-        response.status
-      );
-
-      console.log(
-        "LAB BOOKING RESPONSE:",
-        data
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            "Unable to create lab booking."
-        );
-      }
-
-      setBookingId(
-        data?.booking?.id ||
-          ""
-      );
-
-      setMessage(
-        "Lab booking created successfully! 🎉"
-      );
-
-      // Clear selected tests
-      setSelectedTests([]);
-
-      // Refresh database bookings
-      await loadBookings();
-    } catch (err: any) {
-      console.error(
-        "LAB BOOKING ERROR:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Something went wrong while creating the lab booking."
-      );
-    } finally {
-      setBookingLoading(false);
-    }
-  }
-
-  // ==========================================
-  // STATUS STYLE
-  // ==========================================
-
-  function getStatusClass(
-    status: string
-  ) {
-    if (
-      status === "CONFIRMED"
-    ) {
-      return "bg-cyan-400/10 text-cyan-300 border-cyan-400/20";
-    }
-
-    if (
-      status === "COMPLETED"
-    ) {
-      return "bg-green-400/10 text-green-300 border-green-400/20";
-    }
-
-    if (
-      status === "CANCELLED"
-    ) {
-      return "bg-red-400/10 text-red-300 border-red-400/20";
-    }
-
-    return "bg-yellow-400/10 text-yellow-300 border-yellow-400/20";
+  function placeOrder() {
+    setOrderPlaced(true);
+    setSelectedService(true);
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen bg-[#f4f5f2] text-[#26362e]">
+      <div className="flex min-h-screen">
 
-      {/* ======================================
-          NAVBAR
-      ====================================== */}
+        {/* ================================================= */}
+        {/* DESKTOP SIDEBAR */}
+        {/* ================================================= */}
 
-      <nav className="border-b border-white/10 bg-slate-950/90">
+        <aside className="fixed left-0 top-0 hidden h-screen w-[226px] bg-[#0d2b23] px-4 py-4 text-white lg:block">
 
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <div className="flex items-center gap-3 px-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3"
+            >
+              <div className="flex h-[35px] w-[35px] items-center justify-center rounded-[8px] bg-white text-[#58937f]">
+                <span className="text-[19px]">♡</span>
+              </div>
 
-          <Link href="/dashboard">
+              <div>
+                <div className="text-[14px] font-semibold tracking-[-0.02em]">
+                  HOMEHEALTH
+                </div>
 
-            <h1 className="text-2xl font-extrabold tracking-tight">
-              HEALTHCARE
-              <span className="text-cyan-400">
-                360
-              </span>
-            </h1>
-
-            <p className="text-xs text-slate-500">
-              Connected Healthcare Ecosystem
-            </p>
-
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
-          >
-            Dashboard
-          </Link>
-
-        </div>
-
-      </nav>
-
-      {/* ======================================
-          MAIN
-      ====================================== */}
-
-      <section className="mx-auto max-w-7xl px-6 py-10">
-
-        {/* HEADER */}
-
-        <div>
-
-          <p className="text-sm font-semibold text-cyan-400">
-            LAB TESTS & HOME SAMPLE COLLECTION
-          </p>
-
-          <h1 className="mt-2 text-4xl font-extrabold md:text-5xl">
-            Book Lab Tests
-          </h1>
-
-          <p className="mt-4 max-w-2xl leading-7 text-slate-400">
-            Select the tests you need and request
-            a home sample collection through
-            Healthcare 360.
-          </p>
-
-        </div>
-
-        {/* ======================================
-            SUCCESS MESSAGE
-        ====================================== */}
-
-        {message && (
-          <div className="mt-6 rounded-2xl border border-green-400/20 bg-green-400/10 px-5 py-4 text-sm text-green-300">
-            {message}
-
-            {bookingId && (
-              <span className="ml-2 font-bold">
-                Booking ID: {bookingId}
-              </span>
-            )}
+                <div className="text-[9px] font-semibold text-white/65">
+                  360
+                </div>
+              </div>
+            </Link>
           </div>
-        )}
 
-        {/* ======================================
-            ERROR MESSAGE
-        ====================================== */}
+          <nav className="mt-7 space-y-1">
 
-        {error && (
-          <div
-            role="alert"
-            className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 px-5 py-4 text-sm text-red-300"
-          >
-            {error}
-          </div>
-        )}
+            <SidebarItem
+              href="/dashboard"
+              icon="grid"
+              label="Dashboard"
+            />
 
-        {/* ======================================
-            STEP 1
-        ====================================== */}
+            <SidebarItem
+              href="/health-records"
+              icon="upload"
+              label="Upload report"
+            />
 
-        <div className="mt-10">
+            <SidebarItem
+              href="/longitudinal-record"
+              icon="timeline"
+              label="Health timeline"
+            />
 
-          <div className="flex items-center gap-3">
+            <SidebarItem
+              href="/health-gaps"
+              icon="gaps"
+              label="Care gaps"
+            />
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-400 font-bold text-slate-950">
-              1
-            </div>
+            <SidebarItem
+              href="/reminders"
+              icon="reminders"
+              label="Reminders"
+            />
 
-            <div>
+            <SidebarItem
+              href="/ai-care-pilot"
+              icon="ai"
+              label="AI Care Copilot"
+            />
 
-              <h2 className="text-2xl font-bold">
-                Select Lab Tests
-              </h2>
+            <SidebarItem
+              href="/family"
+              icon="family"
+              label="Family healthcare"
+            />
 
-              <p className="text-sm text-slate-500">
-                Choose one or more tests.
+          </nav>
+
+          <div className="absolute bottom-4 left-4 right-4">
+
+            <div className="rounded-xl border border-white/[0.08] bg-white/[0.055] p-3.5">
+
+              <div className="flex items-center gap-2 text-[10px] font-semibold text-[#e1ebe5]">
+                <Icon name="privacy" size={17} />
+                Your health data is encrypted
+              </div>
+
+              <p className="mt-1.5 text-[9px] leading-4 text-[#a9beb5]">
+                Shared only with your permission.
               </p>
 
             </div>
 
           </div>
+        </aside>
 
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* ================================================= */}
+        {/* MAIN */}
+        {/* ================================================= */}
 
-            {labTests.map(
-              (test) => {
+        <div className="min-w-0 flex-1 lg:ml-[226px]">
 
-                const selected =
-                  selectedTests.includes(
-                    test.id
-                  );
+          {/* ================================================= */}
+          {/* TOP BAR */}
+          {/* ================================================= */}
 
-                return (
+          <header className="flex h-[66px] items-center justify-between border-b border-[#e2e6e2] bg-white px-5 sm:px-7">
+
+            <div className="flex min-w-0 items-center gap-3">
+
+              <div className="hidden sm:block">
+
+                <div className="text-[11px] font-semibold text-[#65756d]">
+                  LAB SERVICES
+                </div>
+
+                <div className="mt-0.5 text-[9px] text-[#9aa39e]">
+                  Home diagnostics & sample collection
+                </div>
+
+              </div>
+
+              <div className="flex items-center gap-2 rounded-lg border border-[#e3e8e4] bg-[#fbfcfa] px-3 py-2 text-[10px] text-[#89948e] lg:ml-4">
+
+                <Icon
+                  name="search"
+                  size={15}
+                />
+
+                <span className="hidden sm:inline">
+                  Search reports, medications, events…
+                </span>
+
+                <span className="sm:hidden">
+                  Search
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="flex items-center gap-3">
+
+              <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#f4f7f4] text-[#51645b]">
+
+                <Icon
+                  name="bell"
+                  size={17}
+                />
+
+                <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#2f8a69]" />
+
+              </div>
+
+              <div className="hidden items-center gap-2 sm:flex">
+
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#dcebe3] text-[10px] font-semibold text-[#35604e]">
+                  AM
+                </div>
+
+                <div>
+                  <div className="text-[10px] font-semibold text-[#3f4f47]">
+                    Alex Morgan
+                  </div>
+
+                  <div className="text-[8px] text-[#929b96]">
+                    Premium plan
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </header>
+
+          {/* ================================================= */}
+          {/* CONTENT */}
+          {/* ================================================= */}
+
+          <div className="px-4 py-5 sm:px-6 lg:px-8">
+
+            <div className="mx-auto max-w-[1180px]">
+
+              {/* PAGE HEADER */}
+
+              <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
+                <div>
+
+                  <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#668077]">
+                    DIAGNOSTICS
+                  </div>
+
+                  <h1 className="mt-1.5 text-[25px] font-semibold tracking-[-0.035em] text-[#263a32]">
+                    Lab services
+                  </h1>
+
+                  <p className="mt-1.5 max-w-[620px] text-[11px] leading-5 text-[#7d8983]">
+                    Book trusted diagnostic services from home and keep
+                    your reports connected to your health record.
+                  </p>
+
+                </div>
+
+                <div className="flex items-center gap-2 rounded-full bg-[#e9f4ed] px-3 py-2 text-[9px] font-semibold text-[#527562]">
+
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#2b8768]" />
+
+                  Home sample collection available
+
+                </div>
+
+              </section>
+
+              {/* ================================================= */}
+              {/* RAPID SERVICE HIGHLIGHT */}
+              {/* ================================================= */}
+
+              <section className="mt-5 rounded-[17px] border border-[#dfe7e1] bg-[#eef6f0] p-5 sm:p-6">
+
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+                  <div className="flex items-start gap-4">
+
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[13px] bg-white text-[#35745c] shadow-sm">
+                      <Icon
+                        name="lab"
+                        size={23}
+                      />
+                    </div>
+
+                    <div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+
+                        <h2 className="text-[17px] font-semibold text-[#29473b]">
+                          Rapid Home Lab Service
+                        </h2>
+
+                        <span className="rounded-full bg-[#d8eee1] px-2.5 py-1 text-[8px] font-bold text-[#39735a]">
+                          NEW SERVICE
+                        </span>
+
+                      </div>
+
+                      <p className="mt-1.5 max-w-[650px] text-[10px] leading-5 text-[#708079]">
+                        Order a blood test from home. Our lab partner
+                        can arrange sample collection within 10 minutes
+                        and upload the report within 1 hour,
+                        subject to service availability.
+                      </p>
+
+                    </div>
+
+                  </div>
 
                   <button
                     type="button"
-                    key={test.id}
-                    onClick={() =>
-                      toggleTest(
-                        test.id
-                      )
-                    }
-                    className={`rounded-2xl border p-6 text-left transition duration-300 ${
-                      selected
-                        ? "border-cyan-400 bg-cyan-400/10"
-                        : "border-white/10 bg-white/5 hover:-translate-y-1 hover:border-cyan-400/40"
-                    }`}
+                    onClick={() => {
+                      setActiveTab("rapid");
+                      setSelectedService(true);
+                    }}
+                    className="flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#19765f] px-5 text-[10px] font-semibold text-white transition hover:bg-[#145f4d]"
                   >
+                    Order service
 
-                    <div className="flex items-start justify-between">
-
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-400/10 text-2xl">
-                        🧪
-                      </div>
-
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          selected
-                            ? "bg-cyan-400 text-slate-950"
-                            : "bg-white/5 text-slate-500"
-                        }`}
-                      >
-                        {selected
-                          ? "SELECTED"
-                          : "SELECT"}
-                      </span>
-
-                    </div>
-
-                    <h3 className="mt-6 text-lg font-bold">
-                      {test.name}
-                    </h3>
-
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      {test.description}
-                    </p>
-
-                    <p className="mt-5 text-xl font-extrabold text-cyan-400">
-                      ₹{test.price}
-                    </p>
-
+                    <Icon
+                      name="arrow"
+                      size={15}
+                    />
                   </button>
-                );
-              }
-            )}
 
-          </div>
-
-        </div>
-
-        {/* ======================================
-            STEP 2
-        ====================================== */}
-
-        <div className="mt-12">
-
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-400 font-bold text-slate-950">
-              2
-            </div>
-
-            <div>
-
-              <h2 className="text-2xl font-bold">
-                Patient Details
-              </h2>
-
-              <p className="text-sm text-slate-500">
-                Enter details for home collection.
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8">
-
-            <div className="grid gap-6 md:grid-cols-2">
-
-              {/* NAME */}
-
-              <div>
-
-                <label
-                  htmlFor="patientName"
-                  className="mb-2 block text-sm font-semibold text-slate-300"
-                >
-                  Full Name
-                </label>
-
-                <input
-                  id="patientName"
-                  type="text"
-                  value={patientName}
-                  onChange={(e) =>
-                    setPatientName(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Enter patient name"
-                  autoComplete="name"
-                  className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400"
-                />
-
-              </div>
-
-              {/* PHONE */}
-
-              <div>
-
-                <label
-                  htmlFor="phone"
-                  className="mb-2 block text-sm font-semibold text-slate-300"
-                >
-                  Mobile Number
-                </label>
-
-                <input
-                  id="phone"
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
-                  value={phone}
-                  onChange={(e) =>
-                    setPhone(
-                      e.target.value.replace(
-                        /\D/g,
-                        ""
-                      )
-                    )
-                  }
-                  placeholder="10-digit mobile number"
-                  autoComplete="tel"
-                  className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400"
-                />
-
-              </div>
-
-              {/* ADDRESS */}
-
-              <div className="md:col-span-2">
-
-                <label
-                  htmlFor="address"
-                  className="mb-2 block text-sm font-semibold text-slate-300"
-                >
-                  Home Collection Address
-                </label>
-
-                <textarea
-                  id="address"
-                  value={address}
-                  onChange={(e) =>
-                    setAddress(
-                      e.target.value
-                    )
-                  }
-                  placeholder="House number, street, city, PIN code"
-                  rows={4}
-                  autoComplete="street-address"
-                  className="w-full resize-none rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400"
-                />
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* ======================================
-            STEP 3
-        ====================================== */}
-
-        <div className="mt-12">
-
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-400 font-bold text-slate-950">
-              3
-            </div>
-
-            <div>
-
-              <h2 className="text-2xl font-bold">
-                Collection Schedule
-              </h2>
-
-              <p className="text-sm text-slate-500">
-                Select preferred date and time.
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8">
-
-            <div className="grid gap-6 md:grid-cols-2">
-
-              {/* DATE */}
-
-              <div>
-
-                <label
-                  htmlFor="date"
-                  className="mb-2 block text-sm font-semibold text-slate-300"
-                >
-                  Collection Date
-                </label>
-
-                <input
-                  id="date"
-                  type="date"
-                  min={today}
-                  value={date}
-                  onChange={(e) =>
-                    setDate(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none focus:border-cyan-400"
-                />
-
-              </div>
-
-              {/* TIME */}
-
-              <div>
-
-                <label
-                  htmlFor="time"
-                  className="mb-2 block text-sm font-semibold text-slate-300"
-                >
-                  Preferred Time
-                </label>
-
-                <select
-                  id="time"
-                  value={time}
-                  onChange={(e) =>
-                    setTime(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none focus:border-cyan-400"
-                >
-
-                  <option value="">
-                    Select time
-                  </option>
-
-                  {timeSlots.map(
-                    (slot) => (
-                      <option
-                        key={slot}
-                        value={slot}
-                      >
-                        {slot}
-                      </option>
-                    )
-                  )}
-
-                </select>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* ======================================
-            SUMMARY
-        ====================================== */}
-
-        <div className="mt-12 rounded-3xl border border-cyan-400/20 bg-cyan-400/5 p-6 md:p-8">
-
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-
-            <div>
-
-              <p className="text-sm font-semibold text-cyan-400">
-                BOOKING SUMMARY
-              </p>
-
-              <h2 className="mt-2 text-2xl font-bold">
-                {selectedTests.length} Test
-                {selectedTests.length !== 1
-                  ? "s"
-                  : ""}{" "}
-                Selected
-              </h2>
-
-              <p className="mt-2 text-sm text-slate-400">
-                Home sample collection
-              </p>
-
-            </div>
-
-            <div className="md:text-right">
-
-              <p className="text-sm text-slate-500">
-                Total
-              </p>
-
-              <p className="text-3xl font-extrabold text-cyan-400">
-                ₹{total}
-              </p>
-
-            </div>
-
-          </div>
-
-          <button
-            type="button"
-            onClick={
-              handleBooking
-            }
-            disabled={
-              bookingLoading
-            }
-            className="mt-7 w-full rounded-xl bg-cyan-400 px-6 py-4 font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {bookingLoading
-              ? "Creating Booking..."
-              : "🧪 Create Home Collection Request →"}
-          </button>
-
-        </div>
-
-        {/* ======================================
-            MY LAB BOOKINGS
-        ====================================== */}
-
-        <section className="mt-12">
-
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8">
-
-            <div className="mb-6">
-
-              <p className="text-sm font-semibold text-cyan-400">
-                DATABASE
-              </p>
-
-              <h2 className="mt-1 text-2xl font-bold">
-                My Lab Bookings
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Your lab collection requests are loaded
-                directly from the Healthcare 360 database.
-              </p>
-
-            </div>
-
-            {loadingBookings ? (
-
-              <div className="rounded-2xl border border-white/10 bg-slate-950 p-6 text-center text-slate-500">
-                Loading lab bookings...
-              </div>
-
-            ) : bookings.length === 0 ? (
-
-              <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950 p-8 text-center">
-
-                <div className="text-4xl">
-                  🧪
                 </div>
 
-                <p className="mt-3 font-semibold">
-                  No lab bookings yet
-                </p>
+                <div className="mt-5 grid gap-3 border-t border-[#d8e6dc] pt-4 sm:grid-cols-3">
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Your bookings will appear here after
-                  creating a collection request.
-                </p>
+                  <div className="flex items-center gap-3">
+
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#39755e]">
+                      <Icon
+                        name="clock"
+                        size={17}
+                      />
+                    </span>
+
+                    <div>
+                      <div className="text-[11px] font-semibold text-[#3a554a]">
+                        10 minutes
+                      </div>
+
+                      <div className="text-[9px] text-[#83908a]">
+                        Blood sample collection
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div className="flex items-center gap-3">
+
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#39755e]">
+                      <Icon
+                        name="report"
+                        size={17}
+                      />
+                    </span>
+
+                    <div>
+                      <div className="text-[11px] font-semibold text-[#3a554a]">
+                        Within 1 hour
+                      </div>
+
+                      <div className="text-[9px] text-[#83908a]">
+                        Report uploaded
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div className="flex items-center gap-3">
+
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#39755e]">
+                      <Icon
+                        name="shield"
+                        size={17}
+                      />
+                    </span>
+
+                    <div>
+                      <div className="text-[11px] font-semibold text-[#3a554a]">
+                        Trusted lab partner
+                      </div>
+
+                      <div className="text-[9px] text-[#83908a]">
+                        Secure report handling
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+              {/* ================================================= */}
+              {/* TABS */}
+              {/* ================================================= */}
+
+              <div className="mt-5 border-b border-[#dfe4e0]">
+
+                <div className="flex items-center gap-6">
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveTab("series")
+                    }
+                    className={[
+                      "relative min-h-10 px-1 text-[11px] font-semibold",
+                      activeTab === "series"
+                        ? "text-[#28624e]"
+                        : "text-[#89938e]",
+                    ].join(" ")}
+                  >
+                    Lab series
+
+                    {activeTab === "series" && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-[#19765f]" />
+                    )}
+
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveTab("rapid")
+                    }
+                    className={[
+                      "relative min-h-10 px-1 text-[11px] font-semibold",
+                      activeTab === "rapid"
+                        ? "text-[#28624e]"
+                        : "text-[#89938e]",
+                    ].join(" ")}
+                  >
+                    Rapid home service
+
+                    {activeTab === "rapid" && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-[#19765f]" />
+                    )}
+
+                  </button>
+
+                </div>
 
               </div>
 
-            ) : (
+              {/* ================================================= */}
+              {/* LAB SERIES */}
+              {/* ================================================= */}
 
-              <div className="space-y-4">
+              {activeTab === "series" && (
+                <>
 
-                {bookings.map(
-                  (booking) => (
+                  <section className="mt-5 rounded-[17px] border border-[#e3e7e3] bg-white p-5">
 
-                    <div
-                      key={booking.id}
-                      className="rounded-2xl border border-white/10 bg-slate-950 p-5"
-                    >
+                    <div className="flex items-start justify-between gap-3">
 
-                      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                      <div>
 
-                        {/* TESTS */}
+                        <h2 className="text-[15px] font-semibold text-[#2e4037]">
+                          Popular lab series
+                        </h2>
 
-                        <div>
+                        <p className="mt-1 text-[10px] text-[#8b948f]">
+                          Pre-defined health check packages for routine
+                          monitoring and wellness.
+                        </p>
 
-                          <h3 className="font-bold">
-                            🧪 Lab Test Collection
+                      </div>
+
+                      <button
+                        type="button"
+                        className="hidden text-[9px] font-semibold text-[#47715e] sm:block"
+                      >
+                        View all →
+                      </button>
+
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+
+                      {labPackages.map((item) => (
+                        <div
+                          key={item.name}
+                          className="rounded-[14px] border border-[#e2e8e3] bg-[#fcfdfb] p-4"
+                        >
+
+                          <div className="flex items-start justify-between gap-2">
+
+                            <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edf5ef] text-[#4d7b67]">
+                              <Icon
+                                name="lab"
+                                size={18}
+                              />
+                            </div>
+
+                            {item.popular && (
+                              <span className="rounded-full bg-[#e8f3ec] px-2 py-1 text-[7px] font-bold text-[#568069]">
+                                Most popular
+                              </span>
+                            )}
+
+                          </div>
+
+                          <h3 className="mt-3 text-[12px] font-semibold text-[#374940]">
+                            {item.name}
                           </h3>
 
-                          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                            {booking.testNames}
+                          <p className="mt-1.5 min-h-[36px] text-[9px] leading-4 text-[#89938e]">
+                            {item.description}
                           </p>
 
+                          <div className="mt-4 flex items-end justify-between gap-2">
+
+                            <div className="text-[17px] font-semibold text-[#293f35]">
+                              {item.price}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openOrder(item.name)
+                              }
+                              className="rounded-lg bg-[#19765f] px-3 py-2 text-[8px] font-semibold text-white hover:bg-[#145f4d]"
+                            >
+                              Book now
+                            </button>
+
+                          </div>
+
                         </div>
+                      ))}
 
-                        {/* STATUS */}
+                    </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
+                  </section>
 
-                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
-                            📅 {booking.date}
+                  {/* INDIVIDUAL TESTS */}
+
+                  <section className="mt-4 rounded-[17px] border border-[#e3e7e3] bg-white p-5">
+
+                    <div>
+
+                      <h2 className="text-[15px] font-semibold text-[#2e4037]">
+                        Individual lab tests
+                      </h2>
+
+                      <p className="mt-1 text-[10px] text-[#8b948f]">
+                        Choose an individual diagnostic test.
+                      </p>
+
+                    </div>
+
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+
+                      {individualTests.map((test) => (
+                        <button
+                          type="button"
+                          key={test.name}
+                          onClick={() =>
+                            openOrder(test.name)
+                          }
+                          className="group flex min-h-[72px] items-center gap-3 rounded-[12px] border border-[#e5e9e5] bg-[#fcfdfb] px-3 text-left transition hover:border-[#cbded2] hover:bg-[#f7faf7]"
+                        >
+
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#eef5ef] text-[#5c806e]">
+                            <Icon
+                              name="lab"
+                              size={17}
+                            />
                           </span>
 
-                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
-                            🕐 {booking.time}
+                          <span className="min-w-0 flex-1">
+
+                            <span className="block text-[10px] font-semibold text-[#415149]">
+                              {test.name}
+                            </span>
+
+                            <span className="mt-1 block text-[8px] leading-4 text-[#919a95]">
+                              {test.description}
+                            </span>
+
                           </span>
 
-                          <span
-                            className={`rounded-full border px-3 py-2 text-sm font-semibold ${getStatusClass(
-                              booking.status
-                            )}`}
-                          >
-                            {booking.status}
-                          </span>
+                          <Icon
+                            name="arrow"
+                            size={14}
+                          />
+
+                        </button>
+                      ))}
+
+                    </div>
+
+                  </section>
+
+                </>
+              )}
+
+              {/* ================================================= */}
+              {/* RAPID HOME SERVICE */}
+              {/* ================================================= */}
+
+              {activeTab === "rapid" && (
+                <section className="mt-5 space-y-4">
+
+                  {/* SERVICE CARD */}
+
+                  <div className="rounded-[17px] border border-[#dfe7e1] bg-white p-5 sm:p-6">
+
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+
+                      <div>
+
+                        <div className="flex items-center gap-3">
+
+                          <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#e9f4ed] text-[#39755e]">
+                            <Icon
+                              name="lab"
+                              size={22}
+                            />
+                          </div>
+
+                          <div>
+
+                            <div className="flex items-center gap-2">
+
+                              <h2 className="text-[17px] font-semibold text-[#2e4037]">
+                                Rapid Home Blood Test
+                              </h2>
+
+                              <span className="rounded-full bg-[#e8f3ec] px-2 py-1 text-[7px] font-bold text-[#4e7a63]">
+                                NEW
+                              </span>
+
+                            </div>
+
+                            <p className="mt-1 text-[9px] text-[#89938e]">
+                              Fast sample collection and report delivery.
+                            </p>
+
+                          </div>
 
                         </div>
 
                       </div>
 
-                      {/* BOOKING DETAILS */}
+                      <div className="rounded-xl bg-[#f5f8f5] px-4 py-3">
 
-                      <div className="mt-5 grid gap-4 border-t border-white/10 pt-5 md:grid-cols-2 lg:grid-cols-4">
-
-                        <div>
-
-                          <p className="text-xs text-slate-600">
-                            Booking ID
-                          </p>
-
-                          <p className="mt-1 break-all text-sm font-semibold text-slate-300">
-                            {booking.id}
-                          </p>
-
+                        <div className="text-[8px] font-semibold uppercase tracking-[0.12em] text-[#87938c]">
+                          Selected service
                         </div>
 
-                        <div>
-
-                          <p className="text-xs text-slate-600">
-                            Patient
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold text-slate-300">
-                            {booking.patientName}
-                          </p>
-
-                        </div>
-
-                        <div>
-
-                          <p className="text-xs text-slate-600">
-                            Mobile
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold text-slate-300">
-                            {booking.mobile}
-                          </p>
-
-                        </div>
-
-                        <div>
-
-                          <p className="text-xs text-slate-600">
-                            Address
-                          </p>
-
-                          <p className="mt-1 text-sm text-slate-400">
-                            {booking.address}
-                          </p>
-
+                        <div className="mt-1 text-[11px] font-semibold text-[#395047]">
+                          {selectedService
+                            ? "Rapid Home Blood Test"
+                            : "Not selected"}
                         </div>
 
                       </div>
 
                     </div>
 
-                  )
-                )}
+                    <div className="mt-6 grid gap-3 md:grid-cols-3">
+
+                      <div className="rounded-[13px] bg-[#f7faf7] p-4">
+
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#4e7b66]">
+                          <Icon
+                            name="clock"
+                            size={18}
+                          />
+                        </div>
+
+                        <div className="mt-3 text-[12px] font-semibold text-[#3c5148]">
+                          10-minute collection
+                        </div>
+
+                        <p className="mt-1 text-[9px] leading-4 text-[#8a948f]">
+                          A lab partner comes to your selected address
+                          for blood sample collection.
+                        </p>
+
+                      </div>
+
+                      <div className="rounded-[13px] bg-[#f7faf7] p-4">
+
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#4e7b66]">
+                          <Icon
+                            name="report"
+                            size={18}
+                          />
+                        </div>
+
+                        <div className="mt-3 text-[12px] font-semibold text-[#3c5148]">
+                          Report within 1 hour
+                        </div>
+
+                        <p className="mt-1 text-[9px] leading-4 text-[#8a948f]">
+                          Once the test is processed, the report is
+                          uploaded to your health record.
+                        </p>
+
+                      </div>
+
+                      <div className="rounded-[13px] bg-[#f7faf7] p-4">
+
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#4e7b66]">
+                          <Icon
+                            name="shield"
+                            size={18}
+                          />
+                        </div>
+
+                        <div className="mt-3 text-[12px] font-semibold text-[#3c5148]">
+                          Secure health record
+                        </div>
+
+                        <p className="mt-1 text-[9px] leading-4 text-[#8a948f]">
+                          Your uploaded report stays connected to your
+                          Healthcare 360 record.
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* HOW IT WORKS */}
+
+                  <div className="rounded-[17px] border border-[#e3e7e3] bg-white p-5">
+
+                    <h2 className="text-[15px] font-semibold text-[#2e4037]">
+                      How it works
+                    </h2>
+
+                    <p className="mt-1 text-[10px] text-[#8b948f]">
+                      A simple three-step service journey.
+                    </p>
+
+                    <div className="mt-5 grid gap-4 md:grid-cols-3">
+
+                      <div className="relative">
+
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e9f4ed] text-[11px] font-bold text-[#39755e]">
+                          1
+                        </div>
+
+                        <h3 className="mt-3 text-[11px] font-semibold text-[#405149]">
+                          Place your order
+                        </h3>
+
+                        <p className="mt-1 text-[9px] leading-4 text-[#89938e]">
+                          Select the test, address and preferred
+                          collection details.
+                        </p>
+
+                      </div>
+
+                      <div className="relative">
+
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e9f4ed] text-[11px] font-bold text-[#39755e]">
+                          2
+                        </div>
+
+                        <h3 className="mt-3 text-[11px] font-semibold text-[#405149]">
+                          Sample collection
+                        </h3>
+
+                        <p className="mt-1 text-[9px] leading-4 text-[#89938e]">
+                          Our partner lab arranges home blood sample
+                          collection within 10 minutes.
+                        </p>
+
+                      </div>
+
+                      <div className="relative">
+
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e9f4ed] text-[11px] font-bold text-[#39755e]">
+                          3
+                        </div>
+
+                        <h3 className="mt-3 text-[11px] font-semibold text-[#405149]">
+                          Report upload
+                        </h3>
+
+                        <p className="mt-1 text-[9px] leading-4 text-[#89938e]">
+                          Your report is uploaded to your health record
+                          within 1 hour, subject to processing.
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* ORDER FORM */}
+
+                  <div className="rounded-[17px] border border-[#e3e7e3] bg-white p-5">
+
+                    <div className="flex items-center gap-3">
+
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-[#eef5ef] text-[#5b7d6b]">
+                        <Icon
+                          name="home"
+                          size={19}
+                        />
+                      </div>
+
+                      <div>
+
+                        <h2 className="text-[15px] font-semibold text-[#2e4037]">
+                          Collection details
+                        </h2>
+
+                        <p className="mt-1 text-[9px] text-[#8b948f]">
+                          Enter the details for your home sample
+                          collection.
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    <div className="mt-5 grid gap-4 md:grid-cols-2">
+
+                      <div>
+
+                        <label className="text-[9px] font-semibold text-[#65746c]">
+                          Patient name
+                        </label>
+
+                        <div className="mt-1.5 flex h-10 items-center gap-2 rounded-lg border border-[#e1e6e2] bg-[#fbfcfa] px-3">
+
+                          <Icon
+                            name="user"
+                            size={15}
+                          />
+
+                          <input
+                            defaultValue="Alex Morgan"
+                            className="w-full bg-transparent text-[10px] text-[#425249] outline-none"
+                          />
+
+                        </div>
+
+                      </div>
+
+                      <div>
+
+                        <label className="text-[9px] font-semibold text-[#65746c]">
+                          Select test
+                        </label>
+
+                        <select
+                          defaultValue="Complete Blood Panel"
+                          className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e6e2] bg-[#fbfcfa] px-3 text-[10px] text-[#425249] outline-none"
+                        >
+                          <option>
+                            Complete Blood Panel
+                          </option>
+                          <option>
+                            CBC
+                          </option>
+                          <option>
+                            Blood Sugar
+                          </option>
+                          <option>
+                            Lipid Profile
+                          </option>
+                          <option>
+                            Liver Function
+                          </option>
+                          <option>
+                            Kidney Function
+                          </option>
+                          <option>
+                            Thyroid Profile
+                          </option>
+                        </select>
+
+                      </div>
+
+                      <div className="md:col-span-2">
+
+                        <label className="text-[9px] font-semibold text-[#65746c]">
+                          Collection address
+                        </label>
+
+                        <div className="mt-1.5 flex min-h-10 items-center gap-2 rounded-lg border border-[#e1e6e2] bg-[#fbfcfa] px-3">
+
+                          <Icon
+                            name="home"
+                            size={15}
+                          />
+
+                          <input
+                            defaultValue="Your saved healthcare address"
+                            className="w-full bg-transparent text-[10px] text-[#425249] outline-none"
+                          />
+
+                        </div>
+
+                      </div>
+
+                      <div>
+
+                        <label className="text-[9px] font-semibold text-[#65746c]">
+                          Preferred date
+                        </label>
+
+                        <div className="mt-1.5 flex h-10 items-center gap-2 rounded-lg border border-[#e1e6e2] bg-[#fbfcfa] px-3">
+
+                          <Icon
+                            name="calendar"
+                            size={15}
+                          />
+
+                          <input
+                            type="date"
+                            className="w-full bg-transparent text-[10px] text-[#425249] outline-none"
+                          />
+
+                        </div>
+
+                      </div>
+
+                      <div>
+
+                        <label className="text-[9px] font-semibold text-[#65746c]">
+                          Preferred time
+                        </label>
+
+                        <select
+                          defaultValue="As soon as possible"
+                          className="mt-1.5 h-10 w-full rounded-lg border border-[#e1e6e2] bg-[#fbfcfa] px-3 text-[10px] text-[#425249] outline-none"
+                        >
+                          <option>
+                            As soon as possible
+                          </option>
+                          <option>
+                            Morning
+                          </option>
+                          <option>
+                            Afternoon
+                          </option>
+                          <option>
+                            Evening
+                          </option>
+                        </select>
+
+                      </div>
+
+                    </div>
+
+                    <div className="mt-5 rounded-xl border border-[#dfe9e1] bg-[#f4f9f5] p-3">
+
+                      <div className="flex items-start gap-3">
+
+                        <Icon
+                          name="shield"
+                          size={17}
+                        />
+
+                        <p className="text-[9px] leading-4 text-[#687971]">
+                          Sample collection timing and report upload
+                          depend on partner-lab availability and
+                          processing. The service will show the
+                          confirmed status after your order is placed.
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {!orderPlaced ? (
+                      <button
+                        type="button"
+                        onClick={placeOrder}
+                        className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#19765f] text-[10px] font-semibold text-white transition hover:bg-[#145f4d]"
+                      >
+                        Place service order
+
+                        <Icon
+                          name="arrow"
+                          size={15}
+                        />
+                      </button>
+                    ) : (
+                      <div className="mt-5 rounded-xl border border-[#cfe4d6] bg-[#edf7f0] p-4">
+
+                        <div className="flex items-start gap-3">
+
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#39755e]">
+                            <Icon
+                              name="check"
+                              size={18}
+                            />
+                          </div>
+
+                          <div>
+
+                            <div className="text-[11px] font-semibold text-[#365548]">
+                              Service order placed
+                            </div>
+
+                            <p className="mt-1 text-[9px] leading-4 text-[#718079]">
+                              Your rapid home lab service request has
+                              been recorded. The confirmed collection
+                              status will appear here when the partner
+                              lab accepts the request.
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+                    )}
+
+                  </div>
+
+                </section>
+              )}
+
+              {/* ================================================= */}
+              {/* PRIVACY / SAFETY FOOTER */}
+              {/* ================================================= */}
+
+              <div className="mt-5 flex flex-col gap-3 rounded-[15px] border border-[#dfe7e1] bg-[#f0f7f2] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+                <div className="flex items-center gap-3">
+
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#4c7b66]">
+                    <Icon
+                      name="shield"
+                      size={17}
+                    />
+                  </span>
+
+                  <div>
+
+                    <div className="text-[10px] font-semibold text-[#3e594d]">
+                      Your health data stays protected
+                    </div>
+
+                    <div className="mt-0.5 text-[8px] text-[#829089]">
+                      Lab reports remain connected to your private
+                      Healthcare 360 record.
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div className="text-[8px] text-[#84918b]">
+                  HOMEHEALTH 360 · Health information is not a diagnosis.
+                </div>
 
               </div>
 
-            )}
+            </div>
 
           </div>
 
-        </section>
-
-        {/* NOTICE */}
-
-        <div className="mt-8 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-5 text-sm leading-6 text-yellow-200/70">
-
-          <strong className="text-yellow-300">
-            Prototype Notice:
-          </strong>{" "}
-          This is currently a software prototype.
-          The test names and prices are illustrative.
-          No real laboratory, payment gateway or
-          home sample collection service is connected yet.
-
         </div>
 
-      </section>
+      </div>
+
+      {/* ===================================================== */}
+      {/* ORDER MODAL */}
+      {/* ===================================================== */}
+
+      {showOrderPanel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#173b30]/25 px-4 backdrop-blur-[2px]">
+
+          <div className="w-full max-w-[430px] rounded-[18px] border border-[#dfe5e1] bg-white p-5 shadow-[0_20px_60px_rgba(20,50,40,0.16)]">
+
+            <div className="flex items-start justify-between gap-3">
+
+              <div>
+
+                <div className="flex items-center gap-2">
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#eaf4ed] text-[#39755e]">
+                    <Icon
+                      name="lab"
+                      size={18}
+                    />
+                  </div>
+
+                  <div>
+                    <h2 className="text-[14px] font-semibold text-[#30463c]">
+                      Book lab service
+                    </h2>
+
+                    <p className="mt-0.5 text-[8px] text-[#89938e]">
+                      {selectedPackage}
+                    </p>
+                  </div>
+
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowOrderPanel(false)
+                }
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#7d8983] hover:bg-[#f5f7f5]"
+                aria-label="Close"
+              >
+                <Icon
+                  name="close"
+                  size={16}
+                />
+              </button>
+
+            </div>
+
+            <div className="mt-5 rounded-xl bg-[#f3f8f4] p-4">
+
+              <div className="grid grid-cols-3 gap-3">
+
+                <div>
+                  <div className="text-[13px] font-semibold text-[#355447]">
+                    10 min
+                  </div>
+
+                  <div className="mt-1 text-[8px] text-[#829089]">
+                    Sample collection
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[13px] font-semibold text-[#355447]">
+                    1 hour
+                  </div>
+
+                  <div className="mt-1 text-[8px] text-[#829089]">
+                    Report upload
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[13px] font-semibold text-[#355447]">
+                    Home
+                  </div>
+
+                  <div className="mt-1 text-[8px] text-[#829089]">
+                    Collection
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div className="mt-4 space-y-2">
+
+              <div className="flex items-center justify-between rounded-lg border border-[#e5e9e5] px-3 py-3">
+
+                <span className="text-[9px] text-[#77837d]">
+                  Collection
+                </span>
+
+                <span className="text-[9px] font-semibold text-[#3c5449]">
+                  Home
+                </span>
+
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border border-[#e5e9e5] px-3 py-3">
+
+                <span className="text-[9px] text-[#77837d]">
+                  Report
+                </span>
+
+                <span className="text-[9px] font-semibold text-[#3c5449]">
+                  Health record
+                </span>
+
+              </div>
+
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowOrderPanel(false);
+                setActiveTab("rapid");
+                setSelectedService(true);
+              }}
+              className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#19765f] text-[10px] font-semibold text-white hover:bg-[#145f4d]"
+            >
+              Continue to service
+
+              <Icon
+                name="arrow"
+                size={14}
+              />
+            </button>
+
+          </div>
+
+        </div>
+      )}
 
     </main>
   );

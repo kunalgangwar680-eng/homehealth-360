@@ -11,6 +11,7 @@ enum UserRole {
   PATIENT
   DOCTOR
   ADMIN
+  LAB
 }
 
 enum AppointmentStatus {
@@ -35,36 +36,43 @@ enum DoctorVerificationStatus {
   SUSPENDED
 }
 
+enum LabVerificationStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
 model User {
-  id                String             @id @default(cuid())
-  name              String
-  email             String             @unique
-  passwordHash      String
-  phone             String?
-  role              UserRole           @default(PATIENT)
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  role         UserRole @default(PATIENT)
 
   appointments      Appointment[]
   labBookings       LabBooking[]
   caregiverBookings CaregiverBooking[]
   healthRecords     HealthRecord[]
   doctorApplication DoctorApplication?
+  labProfile        Lab?
 
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Doctor {
-  id             String        @id @default(cuid())
+  id             String  @id @default(cuid())
   name           String
   specialization String
   experience     String
-  rating         Float         @default(5)
-  available      Boolean       @default(true)
+  rating         Float   @default(5)
+  available      Boolean @default(true)
 
-  appointments   Appointment[]
+  appointments Appointment[]
 
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Appointment {
@@ -82,18 +90,64 @@ model Appointment {
   updatedAt DateTime @updatedAt
 }
 
+model Lab {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  labId     String @unique
+  labName   String
+  ownerName String
+  phone     String
+
+  address String
+  area    String
+  city    String
+  pincode String
+
+  homeCollection Boolean @default(true)
+
+  verificationStatus LabVerificationStatus @default(PENDING)
+  active             Boolean               @default(true)
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  labBookings LabBooking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model LabBooking {
-  id          String        @id @default(cuid())
-  patientId   String
+  id        String  @id @default(cuid())
+  patientId String
+  labId     String?
+
   patientName String
   mobile      String
   address     String
   testNames   String
   date        String
   time        String
-  status      BookingStatus @default(PENDING)
+
+  status BookingStatus @default(PENDING)
+
+  labStage String @default("PENDING")
+
+  orderCreatedAt      DateTime  @default(now())
+  labAcceptedAt       DateTime?
+  collectorAssignedAt DateTime?
+  sampleCollectedAt   DateTime?
+  reportUploadedAt    DateTime?
+  completedAt         DateTime?
+
+  collectionDeadlineAt DateTime?
+  reportDeadlineAt     DateTime?
+
+  reportFileName String?
+  reportFileType String?
+  reportFileData String?
 
   patient User @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  lab     Lab? @relation(fields: [labId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,7 +173,7 @@ model CaregiverBooking {
 }
 
 model HealthRecord {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   patientId  String
   reportName String
   recordType String
@@ -134,12 +188,12 @@ model HealthRecord {
 }
 
 model DoctorApplication {
-  id        String @id @default(cuid())
-  userId    String @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  fullName  String
-  email     String
-  mobile    String
+  fullName String
+  email    String
+  mobile   String
 
   medicalRegistrationNumber String
 
@@ -163,9 +217,9 @@ model DoctorApplication {
 
   status DoctorVerificationStatus @default(PENDING)
 
-  adminNotes  String?
-  reviewedBy  String?
-  reviewedAt  DateTime?
+  adminNotes String?
+  reviewedBy String?
+  reviewedAt DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

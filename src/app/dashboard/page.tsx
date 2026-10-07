@@ -59,7 +59,7 @@ const navItems = [
   },
   {
     label: "AI Care Copilot",
-    href: "/ai-care",
+    href: "/ai-care-pilot",
     icon: "ai" as IconName,
   },
   {
@@ -82,13 +82,13 @@ const navItems = [
 const nextActions = [
   {
     title: "Schedule a diabetic eye screening",
-    subtitle: "Recommended this month Â· based on care guideline",
+    subtitle: "Recommended this month · based on care guideline",
     icon: "eye" as IconName,
     href: "/care-gaps",
   },
   {
     title: "Review your new lab summary",
-    subtitle: "3-minute read Â· processed today",
+    subtitle: "3-minute read · processed today",
     icon: "file" as IconName,
     href: "/health-records",
   },
@@ -507,7 +507,7 @@ export default function PatientDashboard() {
               <div className="flex items-start gap-3">
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-[9px] bg-white text-[#579079]">
-                  <span className="text-[17px]">â™¡</span>
+                  <span className="text-[17px]">♡</span>
                 </div>
 
                 <div>
@@ -669,17 +669,17 @@ export default function PatientDashboard() {
                   </span>
 
                   <span className="ml-2 text-[8px] text-[#a0a8a3]">
-                    âŒ˜K
+                    ⌘K
                   </span>
 
                 </div>
 
                 <span className="hidden rounded-full bg-[#e7f2eb] px-3 py-1.5 text-[8px] font-semibold text-[#477360] sm:block">
-                  â— All data synced
+                  ● All data synced
                 </span>
 
                 <span className="text-[17px]">
-                  ðŸ””  
+                  🔔
                 </span>
 
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#dce9df] text-[9px] font-bold text-[#315e4d]">
@@ -727,7 +727,7 @@ export default function PatientDashboard() {
                 <div className="flex gap-2">
 
                   <Link
-                    href="/ai-care"
+                    href="/ai-care-pilot"
                     className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#dfe5e0] bg-white px-4 text-[10px] font-semibold text-[#496b5a] shadow-[0_1px_3px_rgba(30,48,40,0.03)] hover:bg-[#f8faf8]"
                   >
                     <Icon name="ai" size={16} />
@@ -754,7 +754,7 @@ export default function PatientDashboard() {
               <SnapshotCard
                 title="Health snapshot"
                 value="82 / 100"
-                subtitle="Stable Â· 3 signals improved this month"
+                subtitle="Stable · 3 signals improved this month"
                 highlighted
               />
 
@@ -797,13 +797,13 @@ export default function PatientDashboard() {
                       </div>
 
                       <div className="mt-1 text-[11px] text-[#8b948f]">
-                        A simple view of recent signalsâ€”not a diagnosis.
+                        A simple view of recent signals—not a diagnosis.
                       </div>
 
                     </div>
 
                     <span className="rounded-full bg-[#e9f4ed] px-3 py-1.5 text-[8px] font-semibold text-[#5c806b]">
-                      â— Updated today
+                      ● Updated today
                     </span>
 
                   </div>
@@ -948,7 +948,7 @@ export default function PatientDashboard() {
                       </div>
 
                       <div className="mt-1 text-[9px] text-[#8b948f]">
-                        Mercy Health Â· Oct 5, 2026
+                        Mercy Health · Oct 5, 2026
                       </div>
 
                     </div>
@@ -994,7 +994,7 @@ export default function PatientDashboard() {
                   href="/care-gaps"
                   className="mt-3 flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#dfe6e1] bg-[#fbfcfa] text-[10px] font-semibold text-[#486b58] hover:bg-[#f3f7f3]"
                 >
-                  â†’ Review care plan
+                  → Review care plan
                 </Link>
 
               </section>
@@ -1006,7 +1006,7 @@ export default function PatientDashboard() {
             <div className="mt-5 flex items-center justify-between border-t border-[#e4e7e2] pt-3 text-[8px] text-[#9aa29d]">
 
               <span>
-                HOMEHEALTH 360 Â· Your health story, clearly connected.
+                HOMEHEALTH 360 · Your health story, clearly connected.
               </span>
 
               <span className="hidden sm:block">

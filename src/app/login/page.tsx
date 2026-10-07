@@ -43,10 +43,6 @@ export default function LoginPage() {
         return;
       }
 
-      /*
-       * Save the logged-in user for the existing
-       * HOMEHEALTH 360 frontend flow.
-       */
       if (typeof window !== "undefined") {
         localStorage.setItem(
           "healthcare360_user",
@@ -56,9 +52,6 @@ export default function LoginPage() {
         localStorage.setItem("healthcare360_logged_in", "true");
       }
 
-      /*
-       * Keep role-based redirect if backend returns a role.
-       */
       const user = data.user || data;
       const role = user?.role;
 
@@ -82,7 +75,7 @@ export default function LoginPage() {
       <div className="flex min-h-screen">
 
         {/* ================= LEFT SIDE ================= */}
-        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-emerald-700">
+        <div className="relative hidden overflow-hidden bg-emerald-700 lg:flex lg:w-1/2">
           <video
             autoPlay
             muted
@@ -99,7 +92,6 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-emerald-900/50" />
 
           <div className="relative z-10 flex h-full w-full flex-col justify-between p-12 text-white">
-
             <div>
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
@@ -269,24 +261,68 @@ export default function LoginPage() {
             {/* ================= CREATE ACCOUNT ================= */}
             <div className="my-7 flex items-center gap-4">
               <div className="h-px flex-1 bg-gray-200" />
+
               <span className="text-xs font-medium uppercase tracking-wider text-gray-400">
                 OR
               </span>
+
               <div className="h-px flex-1 bg-gray-200" />
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 text-center">
-              <p className="text-sm text-gray-600">
-                Don't have an account yet?
-              </p>
+            <Link
+              href="/signup"
+              aria-label="Create a new HOMEHEALTH 360 account"
+              className="group block w-full"
+            >
+              <div className="flex items-center justify-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-5 py-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-md">
+                
+                {/* User Plus Icon */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600 shadow-sm transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M19 8v6" />
+                    <path d="M22 11h-6" />
+                  </svg>
+                </div>
 
-              <Link
-                href="/signup"
-                className="mt-2 inline-block font-semibold text-emerald-600 transition hover:text-emerald-700 hover:underline"
-              >
-                Create Account
-              </Link>
-            </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-900 transition-colors group-hover:text-emerald-700">
+                    Create Account
+                  </p>
+
+                  <p className="mt-0.5 text-xs text-gray-500">
+                    New to HOMEHEALTH 360? Get started here.
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="ml-auto h-5 w-5 text-emerald-500 transition-transform duration-200 group-hover:translate-x-1"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m13 6 6 6-6 6" />
+                </svg>
+              </div>
+            </Link>
 
             {/* Bottom text */}
             <p className="mt-7 text-center text-xs leading-5 text-gray-400">

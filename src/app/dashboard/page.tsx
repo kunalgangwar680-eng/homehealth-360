@@ -453,6 +453,63 @@ export default function PatientDashboard() {
     };
   }, [router]);
 
+  /*
+   * INDIA DATE + TIME
+   *
+   * 5:00 AM - 11:59 AM  = Good Morning
+   * 12:00 PM - 4:59 PM  = Good Afternoon
+   * 5:00 PM - 4:59 AM   = Good Evening
+   *
+   * Date always follows India Standard Time (Asia/Kolkata).
+   */
+  const [greeting, setGreeting] = useState("Good Evening");
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+
+      const indiaDateParts = new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        hour: "numeric",
+        hour12: false,
+      }).formatToParts(now);
+
+      const hour = Number(
+        indiaDateParts.find((part) => part.type === "hour")?.value ?? 0
+      );
+
+      if (hour >= 5 && hour < 12) {
+        setGreeting("Good Morning");
+      } else if (hour >= 12 && hour < 17) {
+        setGreeting("Good Afternoon");
+      } else {
+        setGreeting("Good Evening");
+      }
+
+      const formattedDate = new Intl.DateTimeFormat("en-IN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
+      }).format(now);
+
+      setCurrentDate(formattedDate);
+    };
+
+    updateDateTime();
+
+    /*
+     * Every 30 seconds we check again.
+     * So if the user keeps the dashboard open,
+     * greeting/date will automatically stay current.
+     */
+    const interval = window.setInterval(updateDateTime, 30000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   const firstName = patient?.name
     ? patient.name.trim().split(/\s+/)[0]
     : "Patient";
@@ -706,7 +763,7 @@ export default function PatientDashboard() {
             <section className="pt-5">
 
               <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#929b96]">
-                Monday, October 5
+                {currentDate}
               </div>
 
               <div className="mt-1.5 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -714,7 +771,7 @@ export default function PatientDashboard() {
                 <div>
 
                   <h1 className="text-[30px] font-semibold tracking-[-0.045em] text-[#24332b] sm:text-[32px]">
-                    Good morning, {firstName}
+                    {greeting}, {firstName}
                   </h1>
 
                   <p className="mt-1.5 text-[11px] text-[#7f8983]">
